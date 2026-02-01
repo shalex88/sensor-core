@@ -1,14 +1,15 @@
+cmake_minimum_required(VERSION 3.21)
+
 set(PROJECT_NAME core-service)
 include(cmake/SetVersion.cmake)
 
-if(DEFINED ENV{OE_CMAKE_TOOLCHAIN_FILE})
+if(DEFINED CMAKE_TOOLCHAIN_FILE)
     message(STATUS "Cross compilation")
 else()
     message(STATUS "Native compilation")
     include(cmake/EnableVcpkg.cmake)
 endif()
 
-cmake_minimum_required(VERSION 3.21)
 project(${PROJECT_NAME} LANGUAGES CXX VERSION ${VERSION})
 add_compile_definitions(APP_NAME="${PROJECT_NAME}")
 
@@ -23,7 +24,6 @@ set(CONFIG_DIR "config")
 include_directories(${PROJECT_NAME}
     ${SOURCE_DIR}
     ${proto_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/src/infrastructure/camera/protocol/genicam/include
 )
 
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "${SOURCE_DIR}/*.cpp")
@@ -32,34 +32,16 @@ add_subdirectory(proto)
 find_package(spdlog CONFIG REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
-if(TARGET yaml-cpp::yaml-cpp)
-    set(YAML_CPP_TARGET yaml-cpp::yaml-cpp)
-elseif(TARGET yaml-cpp)
-    set(YAML_CPP_TARGET yaml-cpp)
-endif()
-
-if (CMAKE_CROSSCOMPILING)
-    set(GENICAM_LIB_DIR "${CMAKE_SOURCE_DIR}/src/infrastructure/camera/protocol/genicam/lib/Linux64_ARM")
-else()
-    set(GENICAM_LIB_DIR "${CMAKE_SOURCE_DIR}/src/infrastructure/camera/protocol/genicam/lib/Linux64_x64")
-endif()
-
-file(GLOB GENICAM_LIBS "${GENICAM_LIB_DIR}/*.so*")
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-
-include(resources/registers/GenerateRegistersMap.cmake)
-add_dependencies(${PROJECT_NAME} registers)
 
 function(link_common_libraries target)
     target_link_libraries(${target}
         PRIVATE
         proto
         spdlog::spdlog_header_only
-        ${YAML_CPP_TARGET}
-        registers
+        yaml-cpp::yaml-cpp
         CLI11::CLI11
-        ${GENICAM_LIBS}
     )
 endfunction(link_common_libraries)
 link_common_libraries(${PROJECT_NAME})
