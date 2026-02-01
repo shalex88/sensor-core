@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Get project name
+        run: |
+          echo "PROJECT_NAME=$(echo "${{ github.repository }}" | awk -F '/' '{print $2}')" >> $GITHUB_ENV
+
+      - name: Increment version
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: ${{ startsWith(github.head_ref, 'develop/') && 'minor' || startsWith(github.head_ref, 'hotfix/') && 'patch' }}
+
+      - name: Configure
+        run: |
+          cmake -G "Ninja" -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DVERSION=${{ steps.tag_version.outputs.new_version }}
+
+      - name: Build
+        run: |
+          cmake --build build --target ${{ env.PROJECT_NAME }}
+
+      - name: Create Package
+        id: build_package
+        run: |
+          version=${{ steps.tag_version.outputs.new_version }}
+          cd build
+          cpack -G DEB -D CPACK_DEBIAN_FILE_NAME=DEB-DEFAULT
+          package_name=$(ls ${{ env.PROJECT_NAME }}*deb)
+          mv $package_name ../$package_name
+          echo package_name=$package_name >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          release_name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Artifacts
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ steps.build_package.outputs.package_name }}
+          asset_name: ${{ steps.build_package.outputs.package_name }}
+          asset_content_type: application/x-deb

@@ -1,0 +1,66 @@
+@startuml Request to Response Flow
+'
+' gRPC request handling pipeline
+'
+participant Client
+participant "GrpcTransport\n(grpc::Server)" as GrpcServer
+participant "GrpcCallbackHandler" as Callback
+participant "RequestHandler" as Handler
+participant "Core" as Core
+participant "Camera" as Camera
+participant "CameraHw\n(Sony/Mwir/Adimec/etc)" as Device
+
+== Start server ==
+Client -> GrpcServer: connect & send RPC
+activate GrpcServer
+GrpcServer -> Callback: dispatch request
+activate Callback
+Callback -> Handler: translate RPC -> IRequestHandler call
+activate Handler
+
+== Capability & validation ==
+Handler -> Core: execute (e.g., setZoom)
+activate Core
+Core -> Camera: delegate business op
+activate Camera
+Camera -> Camera: validate connected & ranges
+
+alt capability missing
+    Camera --> Handler: Result error ("unsupported")
+    Handler --> Callback: error status
+    Callback --> GrpcServer: grpc error
+    GrpcServer --> Client: error response
+    deactivate Callback
+    deactivate GrpcServer
+else capability ok
+    Camera -> Device: send protocol command
+    activate Device
+    Device --> Camera: Result (ok / error)
+    deactivate Device
+    Camera --> Core: Result
+    Core --> Handler: Result
+    Handler --> Callback: Result
+    Callback --> GrpcServer: grpc success
+    GrpcServer --> Client: response
+end
+
+deactivate Camera
+DeaCtivate Core
+Deactivate Handler
+Deactivate Callback
+Deactivate GrpcServer
+
+== Stop ==
+Client -> GrpcServer: stop/shutdown
+GrpcServer -> Callback: stop
+Callback -> Handler: stop
+Handler -> Core: stop
+Core -> Camera: close
+Camera -> Device: close
+Device --> Camera: ok
+Camera --> Core: ok
+Core --> Handler: ok
+Handler --> Callback: ok
+Callback --> GrpcServer: ok
+@enduml
+

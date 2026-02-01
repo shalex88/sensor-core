@@ -1,0 +1,10 @@
+{
+  "name": "@PROJECT_NAME@",
+  "version": "@VERSION@",
+  "dependencies": [
+    "spdlog",
+    "yaml-cpp",
+    "grpc",
+    "cli11"
+  ]
+}

@@ -1,0 +1,139 @@
+@startuml Camera Service Main Classes Diagram (Concise)
+
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+
+package camera_service {
+  package capabilities {
+    interface IZoomCapable
+    interface IFocusCapable
+    interface IAutoFocusCapable
+    interface IStabilizeCapable
+    interface IInfoCapable
+  }
+
+  package api {
+    class ApiController {
+      - request_handler_
+      - transport_
+      - server_address_
+    }
+    interface IRequestHandler
+    class RequestHandler
+    interface ITransport
+    class GrpcTransport
+    class GrpcCallbackHandler
+    class ApiControllerFactory
+  }
+
+  package core {
+    interface ICore
+    class Core {
+      - camera_
+    }
+    class CoreFactory
+  }
+
+  package infrastructure {
+    package camera {
+      interface ICamera
+      interface ICameraHw
+      class Camera {
+        - camera_hw_
+      }
+      class SonyCamera
+      class MwirCamera
+      class AdimecCamera
+      class FakeAdvancedCamera
+      class FakeSimpleCamera
+      class CameraFactory
+    }
+  }
+
+  package common {
+    class ConfigManager
+    class ApiConfig
+    class CoreConfig
+    class InfrastructureConfig
+    class EndpointConfig
+  }
+
+  package app {
+    class Application {
+      - config_
+      - api_controller_
+    }
+  }
+}
+
+' Relationships (unchanged semantics)
+ApiController o-- IRequestHandler
+ApiController o-- ITransport
+ApiControllerFactory ..> ApiController: creates >
+ApiControllerFactory ..> GrpcTransport: creates >
+ApiControllerFactory ..> RequestHandler: creates >
+ApiControllerFactory ..> ICore: uses >
+
+RequestHandler --|> IRequestHandler
+RequestHandler o-- ICore
+
+GrpcTransport --|> ITransport
+GrpcTransport o-- GrpcCallbackHandler
+GrpcTransport ..> IRequestHandler: uses
+
+GrpcCallbackHandler o-- IRequestHandler
+
+Core --|> ICore
+Core o-- ICamera
+
+CoreFactory ..> Core: creates >
+CoreFactory ..> ICamera: uses >
+
+ICamera --|> IZoomCapable
+ICamera --|> IFocusCapable
+ICamera --|> IAutoFocusCapable
+ICamera --|> IStabilizeCapable
+ICamera --|> IInfoCapable
+
+Camera --|> ICamera
+Camera o-- ICameraHw
+
+SonyCamera --|> ICameraHw
+SonyCamera --|> IZoomCapable
+SonyCamera --|> IFocusCapable
+SonyCamera --|> IAutoFocusCapable
+SonyCamera --|> IStabilizeCapable
+SonyCamera --|> IInfoCapable
+
+MwirCamera --|> ICameraHw
+MwirCamera --|> IZoomCapable
+MwirCamera --|> IFocusCapable
+MwirCamera --|> IAutoFocusCapable
+MwirCamera --|> IInfoCapable
+
+AdimecCamera --|> ICameraHw
+AdimecCamera --|> IInfoCapable
+
+FakeAdvancedCamera --|> ICameraHw
+FakeAdvancedCamera --|> IZoomCapable
+FakeAdvancedCamera --|> IFocusCapable
+FakeAdvancedCamera --|> IAutoFocusCapable
+FakeAdvancedCamera --|> IStabilizeCapable
+
+FakeSimpleCamera --|> ICameraHw
+FakeSimpleCamera --|> IInfoCapable
+
+CameraFactory ..> Camera: creates >
+CameraFactory ..> SonyCamera: creates >
+CameraFactory ..> MwirCamera: creates >
+CameraFactory ..> AdimecCamera: creates >
+CameraFactory ..> FakeAdvancedCamera: creates >
+CameraFactory ..> FakeSimpleCamera: creates >
+
+Application o-- ConfigManager
+Application o-- ApiController
+Application ..> ApiControllerFactory: creates >
+Application ..> CoreFactory: creates >
+Application ..> CameraFactory: creates >
+
+@enduml
