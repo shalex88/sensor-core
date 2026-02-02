@@ -1,8 +1,8 @@
-# core-service
+# sensor-core
 
-[![Test](https://github.com/shalex88/core-service/actions/workflows/test.yml/badge.svg)](https://github.com/shalex88/core-service/actions/workflows/test.yml)
-[![Coverage](https://img.shields.io/codecov/c/github/shalex88/core-service)](https://codecov.io/github/shalex88/core-service)
-[![Release](https://img.shields.io/github/v/release/shalex88/core-service.svg)](https://github.com/shalex88/core-service/releases/latest)
+[![Test](https://github.com/shalex88/sensor-core/actions/workflows/test.yml/badge.svg)](https://github.com/shalex88/sensor-core/actions/workflows/test.yml)
+[![Coverage](https://img.shields.io/codecov/c/github/shalex88/sensor-core)](https://codecov.io/github/shalex88/sensor-core)
+[![Release](https://img.shields.io/github/v/release/shalex88/sensor-core.svg)](https://github.com/shalex88/sensor-core/releases/latest)
 
 ## Build
 
@@ -14,14 +14,14 @@
 
 ```bash
 ./scripts/install.sh
-sudo dpkg -i ./build-native/core-service-tests_0.0.0_amd64.deb
+sudo dpkg -i ./build-native/sensor-core-tests_0.0.0_amd64.deb
 ```
 
 ## Usage
 
 ```bash
 A camera control service
-core-service [OPTIONS]
+sensor-core [OPTIONS]
 OPTIONS:
 -h,     --help              Print this help message and exit
 -v,     --version           Show version information
@@ -31,7 +31,7 @@ OPTIONS:
 ## Run
 
 ```bash
-./core-service -c ../config/config-wfov.yaml
+./sensor-core -c ../config/config-wfov.yaml
 
 # Run client
 grpcui -plaintext 0.0.0.0:50051
@@ -42,19 +42,19 @@ grpcui -plaintext 0.0.0.0:50051
 ### Unit tests
 
 ```bash
-./core-service-unit-tests
+./sensor-core-unit-tests
 ```
 
 ### Integration tests
 
 ```bash
-./core-service-integration-tests
+./sensor-core-integration-tests
 ```
 
 ### System tests
 
 ```bash
-./core-service-system-tests
+./sensor-core-system-tests
 ```
 
 ## Add new functionality

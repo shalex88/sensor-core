@@ -49,7 +49,7 @@ if [ "$BUILD_TYPE" == "cross" ]; then
         TEMP_SCRIPT="/tmp/docker_build_${BUILD_TYPE}_$$.sh"
         cat > "$TEMP_SCRIPT" << EOFSCRIPT
 #!/bin/bash -e
-cd /workspace/submodules/orin/core-service
+cd /workspace/submodules/orin/sensor-core
 source /workspace/toolchains/"$TOOLCHAIN_NAME"/env.sh
 # Propagate INSTALL_ROOT if set
 if [ -n "\${INSTALL_ROOT:-}" ]; then
@@ -62,7 +62,7 @@ EOFSCRIPT
         # Run build inside Docker container
         # Mount the entire project root so all submodules are accessible
         # Propagate INSTALL_ROOT into the container if set
-        DOCKER_ARGS="-v $PROJECT_ROOT:/workspace -v $TEMP_SCRIPT:/tmp/docker_build.sh -w /workspace/submodules/orin/core-service"
+        DOCKER_ARGS="-v $PROJECT_ROOT:/workspace -v $TEMP_SCRIPT:/tmp/docker_build.sh -w /workspace/submodules/orin/sensor-core"
         if [ -n "${INSTALL_ROOT:-}" ]; then
             DOCKER_ARGS="$DOCKER_ARGS -e INSTALL_ROOT=$INSTALL_ROOT"
             echo "Propagating INSTALL_ROOT to container: $INSTALL_ROOT"
@@ -79,7 +79,7 @@ fi
 
 # Use this to prevent installing gstreamer via vcpkg
 if [ "$BUILD_TYPE" == "native" ]; then
-    sudo apt -y install pkg-config
+    sudo apt -y install pkg-config libgstreamer1.0-dev
 fi
 
 BUILD_DIR="build-$BUILD_TYPE"

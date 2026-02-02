@@ -58,20 +58,20 @@ namespace service::api {
             return reactor;
         }
 
-        camera::v1::Capability toProto(const common::capabilities::Capability capability) {
+        core::v1::Capability toProto(const common::capabilities::Capability capability) {
             switch (capability) {
             case common::capabilities::Capability::Zoom:
-                return camera::v1::CAPABILITY_ZOOM;
+                return core::v1::CAPABILITY_ZOOM;
             case common::capabilities::Capability::Focus:
-                return camera::v1::CAPABILITY_FOCUS;
+                return core::v1::CAPABILITY_FOCUS;
             case common::capabilities::Capability::AutoFocus:
-                return camera::v1::CAPABILITY_AUTO_FOCUS;
+                return core::v1::CAPABILITY_AUTO_FOCUS;
             case common::capabilities::Capability::Info:
-                return camera::v1::CAPABILITY_INFO;
+                return core::v1::CAPABILITY_INFO;
             case common::capabilities::Capability::Stabilization:
-                return camera::v1::CAPABILITY_STABILIZATION;
+                return core::v1::CAPABILITY_STABILIZATION;
             default:
-                return camera::v1::CAPABILITY_UNSPECIFIED;
+                return core::v1::CAPABILITY_UNSPECIFIED;
             }
         }
     } // unnamed namespace
@@ -82,20 +82,20 @@ namespace service::api {
 
     grpc::ServerUnaryReactor* GrpcCallbackHandler::SetZoom(
         grpc::CallbackServerContext* context,
-        const camera::v1::SetZoomRequest* request,
-        camera::v1::SetZoomResponse* response) {
+        const core::v1::SetZoomRequest* request,
+        core::v1::SetZoomResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const camera::v1::SetZoomRequest* req, camera::v1::SetZoomResponse*) {
+            [this](const core::v1::SetZoomRequest* req, core::v1::SetZoomResponse*) {
                 return request_handler_.setZoom(req->zoom());
             });
     }
 
     grpc::ServerUnaryReactor* GrpcCallbackHandler::SetFocus(
         grpc::CallbackServerContext* context,
-        const camera::v1::SetFocusRequest* request,
-        camera::v1::SetFocusResponse* response) {
+        const core::v1::SetFocusRequest* request,
+        core::v1::SetFocusResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const camera::v1::SetFocusRequest* req, camera::v1::SetFocusResponse*) {
+            [this](const core::v1::SetFocusRequest* req, core::v1::SetFocusResponse*) {
                 return request_handler_.setFocus(req->focus());
             });
     }
@@ -103,9 +103,9 @@ namespace service::api {
     grpc::ServerUnaryReactor* GrpcCallbackHandler::GetZoom(
         grpc::CallbackServerContext* context,
         const google::protobuf::Empty* request,
-        camera::v1::GetZoomResponse* response) {
+        core::v1::GetZoomResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const google::protobuf::Empty*, camera::v1::GetZoomResponse* resp) {
+            [this](const google::protobuf::Empty*, core::v1::GetZoomResponse* resp) {
                 const auto result = request_handler_.getZoom();
                 if (result.isSuccess()) {
                     resp->set_zoom(result.value());
@@ -118,9 +118,9 @@ namespace service::api {
     grpc::ServerUnaryReactor* GrpcCallbackHandler::GetFocus(
         grpc::CallbackServerContext* context,
         const google::protobuf::Empty* request,
-        camera::v1::GetFocusResponse* response) {
+        core::v1::GetFocusResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const google::protobuf::Empty*, camera::v1::GetFocusResponse* resp) {
+            [this](const google::protobuf::Empty*, core::v1::GetFocusResponse* resp) {
                 const auto result = request_handler_.getFocus();
                 if (result.isSuccess()) {
                     resp->set_focus(result.value());
@@ -133,9 +133,9 @@ namespace service::api {
     grpc::ServerUnaryReactor* GrpcCallbackHandler::GetInfo(
         grpc::CallbackServerContext* context,
         const google::protobuf::Empty* request,
-        camera::v1::GetInfoResponse* response) {
+        core::v1::GetInfoResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const google::protobuf::Empty*, camera::v1::GetInfoResponse* resp) {
+            [this](const google::protobuf::Empty*, core::v1::GetInfoResponse* resp) {
                 const auto result = request_handler_.getInfo();
                 if (result.isSuccess()) {
                     resp->set_info(result.value());
@@ -148,9 +148,9 @@ namespace service::api {
     grpc::ServerUnaryReactor* GrpcCallbackHandler::GetCapabilities(
         grpc::CallbackServerContext* context,
         const google::protobuf::Empty* request,
-        camera::v1::GetCapabilitiesResponse* response) {
+        core::v1::GetCapabilitiesResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const google::protobuf::Empty*, camera::v1::GetCapabilitiesResponse* resp) {
+            [this](const google::protobuf::Empty*, core::v1::GetCapabilitiesResponse* resp) {
                 const auto result = request_handler_.getCapabilities();
                 if (result.isError()) {
                     return Result<void>::error(result.error());
@@ -167,9 +167,9 @@ namespace service::api {
     grpc::ServerUnaryReactor* GrpcCallbackHandler::GoToMinZoom(
         grpc::CallbackServerContext* context,
         const google::protobuf::Empty* request,
-        camera::v1::GoToMinZoomResponse* response) {
+        core::v1::GoToMinZoomResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const google::protobuf::Empty*, camera::v1::GoToMinZoomResponse*) {
+            [this](const google::protobuf::Empty*, core::v1::GoToMinZoomResponse*) {
                 const auto result = request_handler_.goToMinZoom();
                 if (result.isSuccess()) {
                     return Result<void>::success();
@@ -181,9 +181,9 @@ namespace service::api {
     grpc::ServerUnaryReactor* GrpcCallbackHandler::GoToMaxZoom(
         grpc::CallbackServerContext* context,
         const google::protobuf::Empty* request,
-        camera::v1::GoToMaxZoomResponse* response) {
+        core::v1::GoToMaxZoomResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const google::protobuf::Empty*, camera::v1::GoToMaxZoomResponse*) {
+            [this](const google::protobuf::Empty*, core::v1::GoToMaxZoomResponse*) {
                 const auto result = request_handler_.goToMaxZoom();
                 if (result.isSuccess()) {
                     return Result<void>::success();
@@ -194,20 +194,20 @@ namespace service::api {
 
     grpc::ServerUnaryReactor* GrpcCallbackHandler::SetAutoFocus(
     grpc::CallbackServerContext* context,
-    const camera::v1::SetAutoFocusRequest* request,
+    const core::v1::SetAutoFocusRequest* request,
     google::protobuf::Empty* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const camera::v1::SetAutoFocusRequest* req, google::protobuf::Empty*) {
+            [this](const core::v1::SetAutoFocusRequest* req, google::protobuf::Empty*) {
                 return request_handler_.enableAutoFocus(req->enable());
             });
     }
 
     grpc::ServerUnaryReactor* GrpcCallbackHandler::SetStabilization(
     grpc::CallbackServerContext* context,
-    const camera::v1::SetStabilizationRequest* request,
+    const core::v1::SetStabilizationRequest* request,
     google::protobuf::Empty* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const camera::v1::SetStabilizationRequest* req, google::protobuf::Empty*) {
+            [this](const core::v1::SetStabilizationRequest* req, google::protobuf::Empty*) {
                 return request_handler_.stabilize(req->enable());
             });
     }

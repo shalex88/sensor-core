@@ -13,4 +13,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(vcpkg)
 
+if(DEFINED VCPKG_CHAINLOAD_TOOLCHAIN_FILE)
+    set(CMAKE_CROSSCOMPILING TRUE)
+endif()
+
 set(CMAKE_TOOLCHAIN_FILE "${vcpkg_SOURCE_DIR}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file" FORCE)

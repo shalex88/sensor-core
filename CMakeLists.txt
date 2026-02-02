@@ -1,14 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 
-set(PROJECT_NAME core-service)
+set(PROJECT_NAME sensor-core)
 include(cmake/SetVersion.cmake)
-
-if(DEFINED CMAKE_TOOLCHAIN_FILE)
-    message(STATUS "Cross compilation")
-else()
-    message(STATUS "Native compilation")
-    include(cmake/EnableVcpkg.cmake)
-endif()
+include(cmake/EnableVcpkg.cmake)
 
 project(${PROJECT_NAME} LANGUAGES CXX VERSION ${VERSION})
 add_compile_definitions(APP_NAME="${PROJECT_NAME}")
