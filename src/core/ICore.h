@@ -33,5 +33,9 @@ namespace service::core {
 
         // Capability inquiry
         virtual Result<common::capabilities::CapabilityList> getCapabilities(uint32_t camera_id) const = 0;
+
+        // Video operations (routed by camera_id)
+        virtual Result<void> enableOptionalElement(uint32_t camera_id, const std::string& element) const = 0;
+        virtual Result<void> disableOptionalElement(uint32_t camera_id, const std::string& element) const = 0;
     };
 } // namespace service::core

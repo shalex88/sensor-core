@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include "common/types/Result.h"
 #include "common/types/CameraTypes.h"
 #include "common/types/CameraCapabilities.h"
@@ -27,5 +28,9 @@ namespace service::api {
         virtual Result<void> stabilize(uint32_t camera_id, bool on) const = 0;
 
         virtual Result<common::capabilities::CapabilityList> getCapabilities(uint32_t camera_id) const = 0;
+
+        // Video operations (routed by camera_id)
+        virtual Result<void> enableOptionalElement(uint32_t camera_id, const std::string& element) const = 0;
+        virtual Result<void> disableOptionalElement(uint32_t camera_id, const std::string& element) const = 0;
     };
 }

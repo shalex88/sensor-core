@@ -37,6 +37,10 @@ namespace service::api {
 
         Result<common::capabilities::CapabilityList> getCapabilities(uint32_t camera_id) const override;
 
+        // Video operations (routed by camera_id)
+        Result<void> enableOptionalElement(uint32_t camera_id, const std::string& element) const override;
+        Result<void> disableOptionalElement(uint32_t camera_id, const std::string& element) const override;
+
     private:
         std::unique_ptr<core::ICore> core_;
         std::atomic<bool> running_;

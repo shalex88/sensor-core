@@ -11,10 +11,10 @@ using namespace testing;
 
 class CoreFactoryTests : public Test {
 protected:
-    common::InfrastructureConfig createValidConfig() {
-        common::InfrastructureConfig config;
-        common::ClientConfig camera_service;
-        common::ServiceInstance instance;
+    service::common::InfrastructureConfig createValidConfig() {
+        service::common::InfrastructureConfig config;
+        service::common::ClientConfig camera_service;
+        service::common::ServiceInstance instance;
         instance.id = 0;
         instance.address = "localhost:50052";
         camera_service.instances.push_back(instance);
@@ -25,15 +25,14 @@ protected:
 
 TEST_F(CoreFactoryTests, CreateCoreSuccess) {
     const auto config = createValidConfig();
-    const auto core = core::CoreFactory::createCore(config);
-    ASSERT_NE(nullptr, core);
-    ASSERT_TRUE(dynamic_cast<core::Core*>(core.get()) != nullptr);
+    const auto core_instance = service::core::CoreFactory::createCore(config);
+    ASSERT_NE(nullptr, core_instance);
+    ASSERT_TRUE(dynamic_cast<service::core::Core*>(core_instance.get()) != nullptr);
 }
 
 TEST_F(CoreFactoryTests, CreateCoreWithEmptyClients) {
-    common::InfrastructureConfig config;
-    const auto core = core::CoreFactory::createCore(config);
-    ASSERT_NE(nullptr, core);
-    ASSERT_TRUE(dynamic_cast<core::Core*>(core.get()) != nullptr);
+    service::common::InfrastructureConfig config;
+    const auto core_instance = service::core::CoreFactory::createCore(config);
+    ASSERT_NE(nullptr, core_instance);
+    ASSERT_TRUE(dynamic_cast<service::core::Core*>(core_instance.get()) != nullptr);
 }
-

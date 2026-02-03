@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 /* Add your project include files here */
@@ -33,6 +34,8 @@ public:
     MOCK_METHOD(Result<void>, goToMaxZoom, (uint32_t), (const, override));
     MOCK_METHOD(Result<void>, stabilize, (uint32_t, bool), (const, override));
     MOCK_METHOD(Result<common::capabilities::CapabilityList>, getCapabilities, (uint32_t), (const, override));
+    MOCK_METHOD(Result<void>, enableOptionalElement, (uint32_t, const std::string&), (const, override));
+    MOCK_METHOD(Result<void>, disableOptionalElement, (uint32_t, const std::string&), (const, override));
 };
 
 class CoreMock: public core::ICore {
@@ -50,5 +53,7 @@ public:
     MOCK_METHOD(Result<void>, enableAutoFocus, (uint32_t, bool), (const, override));
     MOCK_METHOD(Result<void>, stabilize, (uint32_t, bool), (const, override));
     MOCK_METHOD(Result<common::capabilities::CapabilityList>, getCapabilities, (uint32_t), (const, override));
+    MOCK_METHOD(Result<void>, enableOptionalElement, (uint32_t, const std::string&), (const, override));
+    MOCK_METHOD(Result<void>, disableOptionalElement, (uint32_t, const std::string&), (const, override));
 
 };

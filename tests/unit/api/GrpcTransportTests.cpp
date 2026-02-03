@@ -1,10 +1,11 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <chrono>
+#include <thread>
 /* Add your project include files here */
 #include "api/RequestHandler.h"
 #include "api/GrpcTransport.h"
 #include "common/types/Result.h"
-#include "../../utils/GrpcClient.h"
 #include "../../Mocks.h"
 
 class GrpcTransportTests : public Test {

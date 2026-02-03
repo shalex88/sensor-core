@@ -42,6 +42,10 @@ namespace service::core {
         // Capability inquiry
         Result<common::capabilities::CapabilityList> getCapabilities(uint32_t camera_id) const override;
 
+        // Video operations (routed by camera_id)
+        Result<void> enableOptionalElement(uint32_t camera_id, const std::string& element) const override;
+        Result<void> disableOptionalElement(uint32_t camera_id, const std::string& element) const override;
+
     private:
         bool isRunning() const;
         common::InfrastructureConfig infrastructure_config_;

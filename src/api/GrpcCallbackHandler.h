@@ -59,6 +59,17 @@ namespace service::api {
             const core::v1::SetStabilizationRequest* request,
             google::protobuf::Empty* response) override;
 
+        // Video operations
+        grpc::ServerUnaryReactor* EnableOptionalElement(
+            grpc::CallbackServerContext* context,
+            const core::v1::EnableOptionalElementRequest* request,
+            core::v1::EnableOptionalElementResponse* response) override;
+
+        grpc::ServerUnaryReactor* DisableOptionalElement(
+            grpc::CallbackServerContext* context,
+            const core::v1::DisableOptionalElementRequest* request,
+            core::v1::DisableOptionalElementResponse* response) override;
+
     private:
         IRequestHandler& request_handler_;
     };

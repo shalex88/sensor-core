@@ -212,4 +212,25 @@ namespace service::api {
                 return request_handler_.stabilize(req->camera_id(), req->enable());
             });
     }
+
+    grpc::ServerUnaryReactor* GrpcCallbackHandler::EnableOptionalElement(
+        grpc::CallbackServerContext* context,
+        const core::v1::EnableOptionalElementRequest* request,
+        core::v1::EnableOptionalElementResponse* response) {
+        return handleGrpcSyncRequest(context, request, response,
+            [this](const core::v1::EnableOptionalElementRequest* req, core::v1::EnableOptionalElementResponse*) {
+                return request_handler_.enableOptionalElement(req->camera_id(), req->element());
+            });
+    }
+
+    grpc::ServerUnaryReactor* GrpcCallbackHandler::DisableOptionalElement(
+        grpc::CallbackServerContext* context,
+        const core::v1::DisableOptionalElementRequest* request,
+        core::v1::DisableOptionalElementResponse* response) {
+        return handleGrpcSyncRequest(context, request, response,
+            [this](const core::v1::DisableOptionalElementRequest* req, core::v1::DisableOptionalElementResponse*) {
+                return request_handler_.disableOptionalElement(req->camera_id(), req->element());
+            });
+    }
 } // namespace service::api
+

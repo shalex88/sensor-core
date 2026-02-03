@@ -212,4 +212,40 @@ namespace service::core {
                                                                        e.what());
         }
     }
+
+    Result<void> Core::enableOptionalElement(uint32_t camera_id, const std::string& element) const {
+        if (!isRunning()) {
+            return Result<void>::error("Core is not initialized");
+        }
+
+        try {
+            auto* client = client_manager_->getVideoServiceClient(camera_id);
+            if (!client) {
+                return Result<void>::error("video_service client for instance " + std::to_string(camera_id) +
+                                          " is not available");
+            }
+
+            return client->enableOptionalElement(element);
+        } catch (const std::exception& e) {
+            return Result<void>::error(std::string("enableOptionalElement failed: ") + e.what());
+        }
+    }
+
+    Result<void> Core::disableOptionalElement(uint32_t camera_id, const std::string& element) const {
+        if (!isRunning()) {
+            return Result<void>::error("Core is not initialized");
+        }
+
+        try {
+            auto* client = client_manager_->getVideoServiceClient(camera_id);
+            if (!client) {
+                return Result<void>::error("video_service client for instance " + std::to_string(camera_id) +
+                                          " is not available");
+            }
+
+            return client->disableOptionalElement(element);
+        } catch (const std::exception& e) {
+            return Result<void>::error(std::string("disableOptionalElement failed: ") + e.what());
+        }
+    }
 } // namespace service::core

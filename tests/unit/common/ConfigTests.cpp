@@ -6,6 +6,7 @@
 #include <fstream>
 
 using namespace testing;
+using namespace service;
 
 class ConfigManagerTests : public Test {
 protected:
@@ -13,7 +14,7 @@ protected:
     const std::string invalid_config_path_ = "invalid_config.yaml";
 
     void SetUp() override {
-        // Create a valid test config file with client-based infrastructure
+        // Create a valid test config file with instance-based infrastructure
         std::ofstream config_file(test_config_path_);
         config_file << "app:\n";
         config_file << "  name: test\n";
@@ -24,9 +25,9 @@ protected:
         config_file << "  infrastructure:\n";
         config_file << "    clients:\n";
         config_file << "      camera_service:\n";
-        config_file << "        address: localhost:50052\n";
-        config_file << "        configuration:\n";
-        config_file << "          timeout_ms: \"5000\"\n";
+        config_file << "        instances:\n";
+        config_file << "          - id: 0\n";
+        config_file << "            address: localhost:50052\n";
         config_file.close();
     }
 
@@ -47,7 +48,7 @@ protected:
 };
 
 TEST_F(ConfigManagerTests, LoadValidConfig) {
-    const service::common::ConfigManager config(test_config_path_);
+    const common::ConfigManager config(test_config_path_);
 
     const auto& api_config = config.getApiConfig();
     EXPECT_EQ(api_config.api, "grpc");
@@ -58,9 +59,9 @@ TEST_F(ConfigManagerTests, LoadValidConfig) {
     ASSERT_TRUE(infrastructure_config.clients.contains("camera_service"));
 
     const auto& camera_client = infrastructure_config.clients.at("camera_service");
-    EXPECT_EQ(camera_client.address, "localhost:50052");
-    ASSERT_TRUE(camera_client.configuration.contains("timeout_ms"));
-    EXPECT_EQ(camera_client.configuration.at("timeout_ms"), "5000");
+    ASSERT_EQ(camera_client.instances.size(), 1);
+    EXPECT_EQ(camera_client.instances.front().id, 0u);
+    EXPECT_EQ(camera_client.instances.front().address, "localhost:50052");
 
     const auto& log_level = config.getLogLevel();
     const auto& app_name = config.getAppName();
@@ -80,32 +81,32 @@ TEST_F(ConfigManagerTests, ThrowsOnInvalidYaml) {
 }
 
 TEST_F(ConfigManagerTests, ThrowsOnInvalidApiType) {
-    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: invalid_api\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        address: localhost:50052");
+    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: invalid_api\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 0\n            address: localhost:50052");
     EXPECT_THROW({ service::common::ConfigManager config(invalid_config_path_);
     }, std::runtime_error);
 }
 
 TEST_F(ConfigManagerTests, ThrowsOnMissingServerAddress) {
-    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n  infrastructure:\n    clients:\n      camera_service:\n        address: localhost:50052");
+    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 0\n            address: localhost:50052");
     EXPECT_THROW({ service::common::ConfigManager config(invalid_config_path_);
     }, std::runtime_error);
 }
 
 TEST_F(ConfigManagerTests, ThrowsOnInvalidServerAddressFormat) {
-    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    server_address: invalid_address\n  infrastructure:\n    clients:\n      camera_service:\n        address: localhost:50052");
+    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    server_address: invalid_address\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 0\n            address: localhost:50052");
     EXPECT_THROW({ service::common::ConfigManager config(invalid_config_path_);
     }, std::runtime_error);
 }
 
 TEST_F(ConfigManagerTests, ThrowsOnEmptyClientAddress) {
-    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        address: \"\"");
+    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 0\n            address: \"\"");
     EXPECT_THROW({
         service::common::ConfigManager config(invalid_config_path_);
     }, std::runtime_error);
 }
 
 TEST_F(ConfigManagerTests, HandlesAppName) {
-    createInvalidConfig("app:\n  name: demo\n  log_level: info\n  api:\n    api_type: grpc\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        address: localhost:50052");
+    createInvalidConfig("app:\n  name: demo\n  log_level: info\n  api:\n    api_type: grpc\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 0\n            address: localhost:50052");
     const service::common::ConfigManager config(invalid_config_path_);
 
     const auto& name = config.getAppName();
@@ -113,7 +114,7 @@ TEST_F(ConfigManagerTests, HandlesAppName) {
 }
 
 TEST_F(ConfigManagerTests, HandlesLogLevel) {
-    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        address: localhost:50052");
+    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 0\n            address: localhost:50052");
     const service::common::ConfigManager config(invalid_config_path_);
 
     const auto& log_level = config.getLogLevel();
@@ -121,21 +122,21 @@ TEST_F(ConfigManagerTests, HandlesLogLevel) {
 }
 
 TEST_F(ConfigManagerTests, ThrowsOnMissingAppName) {
-    createInvalidConfig("app:\n  log_level: info\n  api:\n    api_type: grpc\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        address: localhost:50052");
+    createInvalidConfig("app:\n  log_level: info\n  api:\n    api_type: grpc\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 0\n            address: localhost:50052");
     EXPECT_THROW({
         service::common::ConfigManager config(invalid_config_path_);
     }, std::runtime_error);
 }
 
 TEST_F(ConfigManagerTests, ThrowsOnMissingLogLevel) {
-    createInvalidConfig("app:\n  name: test\n  api:\n    api_type: grpc\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        address: localhost:50052");
+    createInvalidConfig("app:\n  name: test\n  api:\n    api_type: grpc\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 0\n            address: localhost:50052");
     EXPECT_THROW({
         service::common::ConfigManager config(invalid_config_path_);
     }, std::runtime_error);
 }
 
 TEST_F(ConfigManagerTests, ThrowsOnInvalidLogLevel) {
-    createInvalidConfig("app:\n  name: test\n  log_level: invalid_level\n  api:\n    api_type: grpc\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        address: localhost:50052");
+    createInvalidConfig("app:\n  name: test\n  log_level: invalid_level\n  api:\n    api_type: grpc\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 0\n            address: localhost:50052");
     EXPECT_THROW({
         service::common::ConfigManager config(invalid_config_path_);
     }, std::runtime_error);
@@ -156,4 +157,3 @@ TEST_F(ConfigManagerTests, HandlesNoInfrastructureSection) {
     const auto& infrastructure_config = config.getInfrastructureConfig();
     EXPECT_EQ(infrastructure_config.clients.size(), 0);
 }
-

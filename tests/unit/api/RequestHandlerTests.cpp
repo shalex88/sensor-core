@@ -292,3 +292,41 @@ TEST_F(RequestHandlerTests, IsRunningFalseAfterStop) {
     ASSERT_TRUE(request_handler->stop().isSuccess());
     EXPECT_FALSE(request_handler->isRunning());
 }
+
+// Video operations tests
+TEST_F(RequestHandlerTests, EnableOptionalElementSuccess) {
+    EXPECT_CALL(*core, start())
+        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*core, enableOptionalElement(0, "overlay"))
+        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*core, stop())
+        .WillOnce(Return(Result<void>::success()));
+
+    ASSERT_TRUE(request_handler->start().isSuccess());
+    ASSERT_TRUE(request_handler->enableOptionalElement(0, "overlay").isSuccess());
+    ASSERT_TRUE(request_handler->stop().isSuccess());
+}
+
+TEST_F(RequestHandlerTests, EnableOptionalElementFailsIfNotRunning) {
+    const auto result = request_handler->enableOptionalElement(0, "overlay");
+    ASSERT_TRUE(result.isError());
+}
+
+TEST_F(RequestHandlerTests, DisableOptionalElementSuccess) {
+    EXPECT_CALL(*core, start())
+        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*core, disableOptionalElement(0, "overlay"))
+        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*core, stop())
+        .WillOnce(Return(Result<void>::success()));
+
+    ASSERT_TRUE(request_handler->start().isSuccess());
+    ASSERT_TRUE(request_handler->disableOptionalElement(0, "overlay").isSuccess());
+    ASSERT_TRUE(request_handler->stop().isSuccess());
+}
+
+TEST_F(RequestHandlerTests, DisableOptionalElementFailsIfNotRunning) {
+    const auto result = request_handler->disableOptionalElement(0, "overlay");
+    ASSERT_TRUE(result.isError());
+}
+

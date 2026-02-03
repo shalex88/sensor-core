@@ -1,5 +1,5 @@
 app:
-  name: core
+  name: sensor-core
   log_level: info
   api:
     api_type: grpc
@@ -9,10 +9,20 @@ app:
       camera_service:
         instances:
           - id: 0
-            address: 0.0.0.0:50052
+            address: frontier-peripheral-ctrl-mpsoc.local:50050
           - id: 1
-            address: 0.0.0.0:50053
+            address: frontier-peripheral-ctrl-mpsoc.local:50051
           - id: 2
-            address: 0.0.0.0:50054
+            address: frontier-peripheral-ctrl-mpsoc.local:50052
           - id: 3
-            address: 0.0.0.0:50055
+            address: frontier-peripheral-ctrl-mpsoc.local:50053
+      video_service:
+        instances:
+          - id: 0
+            address: localhost:50060
+          - id: 1
+            address: localhost:50061
+          - id: 2
+            address: localhost:50062
+          - id: 3
+            address: localhost:50063

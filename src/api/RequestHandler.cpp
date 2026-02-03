@@ -226,4 +226,40 @@ namespace service::api {
 
         return operation;
     }
+
+    Result<void> RequestHandler::enableOptionalElement(uint32_t camera_id, const std::string& element) const {
+        if (!isRunning()) {
+            return Result<void>::error("RequestHandler is not running");
+        }
+
+        LOG_INFO("Request: {} camera_id={} element={}", __func__, camera_id, element);
+
+        auto operation = core_->enableOptionalElement(camera_id, element);
+
+        if (operation.isError()) {
+            LOG_ERROR("Response: {}", operation.error());
+        } else {
+            LOG_INFO("Response: Success");
+        }
+
+        return operation;
+    }
+
+    Result<void> RequestHandler::disableOptionalElement(uint32_t camera_id, const std::string& element) const {
+        if (!isRunning()) {
+            return Result<void>::error("RequestHandler is not running");
+        }
+
+        LOG_INFO("Request: {} camera_id={} element={}", __func__, camera_id, element);
+
+        auto operation = core_->disableOptionalElement(camera_id, element);
+
+        if (operation.isError()) {
+            LOG_ERROR("Response: {}", operation.error());
+        } else {
+            LOG_INFO("Response: Success");
+        }
+
+        return operation;
+    }
 } // namespace service::api

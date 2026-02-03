@@ -49,6 +49,25 @@ namespace service::common {
         for (const auto& [name, client] : clients) {
             client.validate();
         }
+
+        const auto camera_it = clients.find("camera_service");
+        const auto video_it = clients.find("video_service");
+        if (camera_it != clients.end() && video_it != clients.end()) {
+            std::set<uint32_t> camera_ids;
+            std::set<uint32_t> video_ids;
+
+            for (const auto& instance : camera_it->second.instances) {
+                camera_ids.insert(instance.id);
+            }
+            for (const auto& instance : video_it->second.instances) {
+                video_ids.insert(instance.id);
+            }
+
+            if (camera_ids != video_ids) {
+                throw std::runtime_error(
+                    "camera_service and video_service must have matching instance IDs");
+            }
+        }
     }
 
     void AppConfig::validate() const {

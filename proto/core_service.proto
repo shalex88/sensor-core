@@ -24,6 +24,10 @@ service CoreService {
 
   // Advanced operations
   rpc SetStabilization (SetStabilizationRequest) returns (google.protobuf.Empty) {}
+
+  // Video operations
+  rpc EnableOptionalElement (EnableOptionalElementRequest) returns (EnableOptionalElementResponse) {}
+  rpc DisableOptionalElement (DisableOptionalElementRequest) returns (DisableOptionalElementResponse) {}
 }
 
 // Zoom operations
@@ -110,4 +114,21 @@ enum Capability {
 message SetStabilizationRequest {
   uint32 camera_id = 1; // camera instance ID [0 - 3]
   bool enable = 2;
+}
+
+// Video operations
+message EnableOptionalElementRequest {
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
+  string element = 2;
+}
+
+message EnableOptionalElementResponse {
+}
+
+message DisableOptionalElementRequest {
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
+  string element = 2;
+}
+
+message DisableOptionalElementResponse {
 }
