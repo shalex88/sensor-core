@@ -4,39 +4,6 @@
 #include <yaml-cpp/yaml.h>
 
 namespace service::common {
-    namespace {
-        EndpointConfig parseEndpointNode(const YAML::Node& node) {
-            EndpointConfig endpoint;
-
-            if (!node) {
-                return endpoint;
-            }
-
-            if (node.IsScalar()) {
-                endpoint.address = node.as<std::string>();
-                return endpoint;
-            }
-
-            if (node["address"]) {
-                endpoint.address = node["address"].as<std::string>();
-            }
-
-            if (node["configuration"]) {
-                const auto& configuration_node = node["configuration"];
-                if (!configuration_node.IsMap()) {
-                    throw std::runtime_error("Endpoint configuration must be a key/value map");
-                }
-
-                for (const auto& entry : configuration_node) {
-                    const auto key = entry.first.as<std::string>();
-                    const auto value = entry.second.as<std::string>();
-                    endpoint.configuration.emplace(key, value);
-                }
-            }
-
-            return endpoint;
-        }
-    } // unnamed namespace
 
     void ApiConfig::validate() const {
         static const std::set<std::string> valid_apis{"grpc"};
@@ -56,35 +23,31 @@ namespace service::common {
     }
 
     void CoreConfig::validate() const {
-        static const std::set<std::string> valid_cameras{"core"};
+        // No validation needed for CoreConfig after removing camera dependency
+    }
 
-        if (camera.empty()) {
-            throw std::runtime_error("Camera type cannot be empty");
+    void ServiceInstance::validate() const {
+        if (address.empty()) {
+            throw std::runtime_error("Service instance address cannot be empty");
+        }
+        if (address.find(':') == std::string::npos) {
+            throw std::runtime_error("Service instance address must include port (format: host:port)");
         }
     }
 
-    void EndpointConfig::validate() const {
-        if (address.empty()) {
-            throw std::runtime_error("Endpoint address cannot be empty");
+    void ClientConfig::validate() const {
+        if (instances.empty()) {
+            throw std::runtime_error("Client must have at least one instance configured");
+        }
+        for (const auto& instance : instances) {
+            instance.validate();
         }
     }
 
     void InfrastructureConfig::validate() const {
-        static const std::set<std::string> valid_cameras{"sony", "adimec", "mwir", "fake_advanced", "fake_simple"};
-
-        if (camera.empty()) {
-            throw std::runtime_error("Infrastructure camera type cannot be empty");
-        }
-        if (!valid_cameras.contains(camera)) {
-            throw std::runtime_error("Invalid infrastructure camera type: " + camera);
-        }
-
-        for (const auto& endpoint : endpoints) {
-            endpoint.validate();
-        }
-
-        if (camera == "adimec" && endpoints.size() != 2) {
-            throw std::runtime_error("Adimec camera requires exactly 2 endpoints");
+        // Validate all clients
+        for (const auto& [name, client] : clients) {
+            client.validate();
         }
     }
 
@@ -104,10 +67,6 @@ namespace service::common {
         if (name.empty()) {
             throw std::runtime_error("App name cannot be empty");
         }
-
-        if (api_config.server_address == core_config.camera) {
-            throw std::runtime_error("API server address cannot be the same as camera type");
-        }
     }
 
     ConfigManager::ConfigManager(const std::string& filename) : app_config_(std::make_unique<AppConfig>()) {
@@ -123,7 +82,6 @@ namespace service::common {
             if (const YAML::Node config = YAML::LoadFile(filename); config["app"]) {
                 const auto& app_node = config["app"];
                 loadApiConfig(app_node);
-                loadCoreConfig(app_node);
                 loadInfrastructureConfig(app_node);
                 loadAppConfig(app_node);
             }
@@ -145,14 +103,6 @@ namespace service::common {
         }
     }
 
-    void ConfigManager::loadCoreConfig(const YAML::Node& app_node) const {
-        if (app_node["core"]) {
-            if (const auto& core_node = app_node["core"]; core_node["camera"]) {
-                app_config_->core_config.camera = core_node["camera"].as<std::string>();
-            }
-        }
-    }
-
     void ConfigManager::loadInfrastructureConfig(const YAML::Node& app_node) const {
         if (!app_node["infrastructure"]) {
             return;
@@ -160,27 +110,49 @@ namespace service::common {
 
         const auto& infrastructure_node = app_node["infrastructure"];
 
-        if (infrastructure_node["camera"]) {
-            app_config_->infrastructure_config.camera = infrastructure_node["camera"].as<std::string>();
-        }
-
-        if (infrastructure_node["video_channel"]) {
-            app_config_->infrastructure_config.video_channel = infrastructure_node["video_channel"].as<int>();
-        }
-
-        app_config_->infrastructure_config.endpoints.clear();
-
-        if (!infrastructure_node["endpoints"]) {
+        if (!infrastructure_node["clients"]) {
             return;
         }
 
-        const auto& endpoints_node = infrastructure_node["endpoints"];
-        if (!endpoints_node.IsSequence()) {
-            throw std::runtime_error("Endpoints must be a list");
+        const auto& clients_node = infrastructure_node["clients"];
+        if (!clients_node.IsMap()) {
+            throw std::runtime_error("Clients must be a key/value map");
         }
 
-        for (const auto& endpoint_node : endpoints_node) {
-            app_config_->infrastructure_config.endpoints.push_back(parseEndpointNode(endpoint_node));
+        app_config_->infrastructure_config.clients.clear();
+
+        for (const auto& client_entry : clients_node) {
+            const auto client_name = client_entry.first.as<std::string>();
+            const auto& client_node = client_entry.second;
+
+            ClientConfig client_config;
+
+            // Parse instances array (new structure)
+            if (client_node["instances"] && client_node["instances"].IsSequence()) {
+                const auto& instances_node = client_node["instances"];
+                for (const auto& instance_node : instances_node) {
+                    ServiceInstance instance;
+                    if (instance_node["id"]) {
+                        instance.id = instance_node["id"].as<uint32_t>();
+                    } else {
+                        throw std::runtime_error("Service instance must have an 'id' field");
+                    }
+                    if (instance_node["address"]) {
+                        instance.address = instance_node["address"].as<std::string>();
+                    } else {
+                        throw std::runtime_error("Service instance must have an 'address' field");
+                    }
+                    client_config.instances.emplace_back(instance);
+                }
+            } else if (client_node["address"]) {
+                // Legacy: single address (for backwards compatibility)
+                ServiceInstance instance;
+                instance.id = 0;
+                instance.address = client_node["address"].as<std::string>();
+                client_config.instances.emplace_back(instance);
+            }
+
+            app_config_->infrastructure_config.clients.emplace(client_name, client_config);
         }
     }
 

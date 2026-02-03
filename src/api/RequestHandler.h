@@ -22,20 +22,20 @@ namespace service::api {
         bool isRunning() const override;
 
         // Capability-aware request methods
-        Result<void> setZoom(common::types::zoom zoom_level) const override;
-        Result<common::types::zoom> getZoom() const override;
-        Result<void> goToMinZoom() const override;
-        Result<void> goToMaxZoom() const override;
+        Result<void> setZoom(uint32_t camera_id, common::types::zoom zoom_level) const override;
+        Result<common::types::zoom> getZoom(uint32_t camera_id) const override;
+        Result<void> goToMinZoom(uint32_t camera_id) const override;
+        Result<void> goToMaxZoom(uint32_t camera_id) const override;
 
-        Result<void> setFocus(common::types::focus focus_value) const override;
-        Result<common::types::focus> getFocus() const override;
-        Result<void> enableAutoFocus(bool on) const override;
+        Result<void> setFocus(uint32_t camera_id, common::types::focus focus_value) const override;
+        Result<common::types::focus> getFocus(uint32_t camera_id) const override;
+        Result<void> enableAutoFocus(uint32_t camera_id, bool on) const override;
 
-        Result<common::types::info> getInfo() const override;
+        Result<common::types::info> getInfo(uint32_t camera_id) const override;
 
-        Result<void> stabilize(bool on) const override;
+        Result<void> stabilize(uint32_t camera_id, bool on) const override;
 
-        Result<common::capabilities::CapabilityList> getCapabilities() const override;
+        Result<common::capabilities::CapabilityList> getCapabilities(uint32_t camera_id) const override;
 
     private:
         std::unique_ptr<core::ICore> core_;

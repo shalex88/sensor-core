@@ -13,8 +13,6 @@
 #include "common/logger/Logger.h"
 #include "core/CoreFactory.h"
 #include "core/ICore.h"
-#include "infrastructure/camera/CameraFactory.h"
-#include "infrastructure/camera/hal/ICamera.h"
 
 namespace service::app {
     static Application* g_application_instance = nullptr;
@@ -70,8 +68,7 @@ namespace service::app {
             LOG_INFO("{} v{}.{}.{}{}", APP_NAME, APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_VERSION_PATCH,
                      APP_VERSION_DIRTY);
 
-            auto camera = infrastructure::CameraFactory::createCamera(config_->getInfrastructureConfig());
-            auto core = core::CoreFactory::createCore(std::move(camera), config_->getCoreConfig());
+            auto core = core::CoreFactory::createCore(config_->getInfrastructureConfig());
             api_controller_ = api::ApiControllerFactory::createController(std::move(core), config_->getApiConfig());
 
             return Result<void>::success();

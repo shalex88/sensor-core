@@ -6,21 +6,21 @@ import "google/protobuf/empty.proto";
 
 service CoreService {
   // Zoom operations
-  rpc SetZoom (SetZoomRequest) returns (SetZoomResponse) {} //TODO: return current value after setting?
-  rpc GetZoom (google.protobuf.Empty) returns (GetZoomResponse) {}
-  rpc GoToMinZoom (google.protobuf.Empty) returns (GoToMinZoomResponse) {} //TODO: return current value after setting?
-  rpc GoToMaxZoom (google.protobuf.Empty) returns (GoToMaxZoomResponse) {} //TODO: return current value after setting?
+  rpc SetZoom (SetZoomRequest) returns (SetZoomResponse) {}
+  rpc GetZoom (GetZoomRequest) returns (GetZoomResponse) {}
+  rpc GoToMinZoom (GoToMinZoomRequest) returns (GoToMinZoomResponse) {}
+  rpc GoToMaxZoom (GoToMaxZoomRequest) returns (GoToMaxZoomResponse) {}
 
   // Focus operations
-  rpc SetFocus (SetFocusRequest) returns (SetFocusResponse) {} //TODO: return current value after setting?
-  rpc GetFocus (google.protobuf.Empty) returns (GetFocusResponse) {}
+  rpc SetFocus (SetFocusRequest) returns (SetFocusResponse) {}
+  rpc GetFocus (GetFocusRequest) returns (GetFocusResponse) {}
   rpc SetAutoFocus (SetAutoFocusRequest) returns (google.protobuf.Empty) {}
 
   // Device info
-  rpc GetInfo (google.protobuf.Empty) returns (GetInfoResponse) {}
+  rpc GetInfo (GetInfoRequest) returns (GetInfoResponse) {}
 
   // Capabilities
-  rpc GetCapabilities (google.protobuf.Empty) returns (GetCapabilitiesResponse) {}
+  rpc GetCapabilities (GetCapabilitiesRequest) returns (GetCapabilitiesResponse) {}
 
   // Advanced operations
   rpc SetStabilization (SetStabilizationRequest) returns (google.protobuf.Empty) {}
@@ -28,17 +28,30 @@ service CoreService {
 
 // Zoom operations
 message SetZoomRequest {
-  uint32 zoom = 1; // normalized [0 - 100]
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
+  uint32 zoom = 2;      // normalized [0 - 100]
 }
 
 message SetZoomResponse {
+}
+
+message GetZoomRequest {
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
 }
 
 message GetZoomResponse {
   uint32 zoom = 1; // normalized [0 - 100]
 }
 
+message GoToMinZoomRequest {
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
+}
+
 message GoToMinZoomResponse {
+}
+
+message GoToMaxZoomRequest {
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
 }
 
 message GoToMaxZoomResponse {
@@ -46,10 +59,15 @@ message GoToMaxZoomResponse {
 
 // Focus operations
 message SetFocusRequest {
-  uint32 focus = 1; // normalized [0 - 100]
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
+  uint32 focus = 2;     // normalized [0 - 100]
 }
 
 message SetFocusResponse {
+}
+
+message GetFocusRequest {
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
 }
 
 message GetFocusResponse {
@@ -57,15 +75,24 @@ message GetFocusResponse {
 }
 
 message SetAutoFocusRequest {
-  bool enable = 1;
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
+  bool enable = 2;
 }
 
 // Device info
+message GetInfoRequest {
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
+}
+
 message GetInfoResponse {
   string info = 1;
 }
 
 // Capabilities
+message GetCapabilitiesRequest {
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
+}
+
 message GetCapabilitiesResponse {
   repeated Capability capabilities = 1;
 }
@@ -81,5 +108,6 @@ enum Capability {
 
 // Advanced operations
 message SetStabilizationRequest {
-  bool enable = 1;
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
+  bool enable = 2;
 }

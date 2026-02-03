@@ -21,32 +21,32 @@ namespace service::api {
 
         grpc::ServerUnaryReactor* GetZoom(
             grpc::CallbackServerContext* context,
-            const google::protobuf::Empty* request,
+            const core::v1::GetZoomRequest* request,
             core::v1::GetZoomResponse* response) override;
 
         grpc::ServerUnaryReactor* GetFocus(
             grpc::CallbackServerContext* context,
-            const google::protobuf::Empty* request,
+            const core::v1::GetFocusRequest* request,
             core::v1::GetFocusResponse* response) override;
 
         grpc::ServerUnaryReactor* GetInfo(
             grpc::CallbackServerContext* context,
-            const google::protobuf::Empty* request,
+            const core::v1::GetInfoRequest* request,
             core::v1::GetInfoResponse* response) override;
 
         grpc::ServerUnaryReactor* GetCapabilities(
             grpc::CallbackServerContext* context,
-            const google::protobuf::Empty* request,
+            const core::v1::GetCapabilitiesRequest* request,
             core::v1::GetCapabilitiesResponse* response) override;
 
         grpc::ServerUnaryReactor* GoToMinZoom(
             grpc::CallbackServerContext* context,
-            const google::protobuf::Empty* request,
+            const core::v1::GoToMinZoomRequest* request,
             core::v1::GoToMinZoomResponse* response) override;
 
         grpc::ServerUnaryReactor* GoToMaxZoom(
             grpc::CallbackServerContext* context,
-            const google::protobuf::Empty* request,
+            const core::v1::GoToMaxZoomRequest* request,
             core::v1::GoToMaxZoomResponse* response) override;
 
         grpc::ServerUnaryReactor* SetAutoFocus(

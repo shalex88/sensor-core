@@ -86,7 +86,7 @@ namespace service::api {
         core::v1::SetZoomResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
             [this](const core::v1::SetZoomRequest* req, core::v1::SetZoomResponse*) {
-                return request_handler_.setZoom(req->zoom());
+                return request_handler_.setZoom(req->camera_id(), req->zoom());
             });
     }
 
@@ -96,17 +96,18 @@ namespace service::api {
         core::v1::SetFocusResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
             [this](const core::v1::SetFocusRequest* req, core::v1::SetFocusResponse*) {
-                return request_handler_.setFocus(req->focus());
+                return request_handler_.setFocus(req->camera_id(), req->focus());
             });
+
     }
 
     grpc::ServerUnaryReactor* GrpcCallbackHandler::GetZoom(
         grpc::CallbackServerContext* context,
-        const google::protobuf::Empty* request,
+        const core::v1::GetZoomRequest* request,
         core::v1::GetZoomResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const google::protobuf::Empty*, core::v1::GetZoomResponse* resp) {
-                const auto result = request_handler_.getZoom();
+            [this](const core::v1::GetZoomRequest* req, core::v1::GetZoomResponse* resp) {
+                const auto result = request_handler_.getZoom(req->camera_id());
                 if (result.isSuccess()) {
                     resp->set_zoom(result.value());
                     return Result<void>::success();
@@ -117,11 +118,11 @@ namespace service::api {
 
     grpc::ServerUnaryReactor* GrpcCallbackHandler::GetFocus(
         grpc::CallbackServerContext* context,
-        const google::protobuf::Empty* request,
+        const core::v1::GetFocusRequest* request,
         core::v1::GetFocusResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const google::protobuf::Empty*, core::v1::GetFocusResponse* resp) {
-                const auto result = request_handler_.getFocus();
+            [this](const core::v1::GetFocusRequest* req, core::v1::GetFocusResponse* resp) {
+                const auto result = request_handler_.getFocus(req->camera_id());
                 if (result.isSuccess()) {
                     resp->set_focus(result.value());
                     return Result<void>::success();
@@ -132,11 +133,11 @@ namespace service::api {
 
     grpc::ServerUnaryReactor* GrpcCallbackHandler::GetInfo(
         grpc::CallbackServerContext* context,
-        const google::protobuf::Empty* request,
+        const core::v1::GetInfoRequest* request,
         core::v1::GetInfoResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const google::protobuf::Empty*, core::v1::GetInfoResponse* resp) {
-                const auto result = request_handler_.getInfo();
+            [this](const core::v1::GetInfoRequest* req, core::v1::GetInfoResponse* resp) {
+                const auto result = request_handler_.getInfo(req->camera_id());
                 if (result.isSuccess()) {
                     resp->set_info(result.value());
                     return Result<void>::success();
@@ -147,11 +148,11 @@ namespace service::api {
 
     grpc::ServerUnaryReactor* GrpcCallbackHandler::GetCapabilities(
         grpc::CallbackServerContext* context,
-        const google::protobuf::Empty* request,
+        const core::v1::GetCapabilitiesRequest* request,
         core::v1::GetCapabilitiesResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const google::protobuf::Empty*, core::v1::GetCapabilitiesResponse* resp) {
-                const auto result = request_handler_.getCapabilities();
+            [this](const core::v1::GetCapabilitiesRequest* req, core::v1::GetCapabilitiesResponse* resp) {
+                const auto result = request_handler_.getCapabilities(req->camera_id());
                 if (result.isError()) {
                     return Result<void>::error(result.error());
                 }
@@ -166,11 +167,11 @@ namespace service::api {
 
     grpc::ServerUnaryReactor* GrpcCallbackHandler::GoToMinZoom(
         grpc::CallbackServerContext* context,
-        const google::protobuf::Empty* request,
+        const core::v1::GoToMinZoomRequest* request,
         core::v1::GoToMinZoomResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const google::protobuf::Empty*, core::v1::GoToMinZoomResponse*) {
-                const auto result = request_handler_.goToMinZoom();
+            [this](const core::v1::GoToMinZoomRequest* req, core::v1::GoToMinZoomResponse*) {
+                const auto result = request_handler_.goToMinZoom(req->camera_id());
                 if (result.isSuccess()) {
                     return Result<void>::success();
                 }
@@ -180,11 +181,11 @@ namespace service::api {
 
     grpc::ServerUnaryReactor* GrpcCallbackHandler::GoToMaxZoom(
         grpc::CallbackServerContext* context,
-        const google::protobuf::Empty* request,
+        const core::v1::GoToMaxZoomRequest* request,
         core::v1::GoToMaxZoomResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const google::protobuf::Empty*, core::v1::GoToMaxZoomResponse*) {
-                const auto result = request_handler_.goToMaxZoom();
+            [this](const core::v1::GoToMaxZoomRequest* req, core::v1::GoToMaxZoomResponse*) {
+                const auto result = request_handler_.goToMaxZoom(req->camera_id());
                 if (result.isSuccess()) {
                     return Result<void>::success();
                 }
@@ -193,22 +194,22 @@ namespace service::api {
     }
 
     grpc::ServerUnaryReactor* GrpcCallbackHandler::SetAutoFocus(
-    grpc::CallbackServerContext* context,
-    const core::v1::SetAutoFocusRequest* request,
-    google::protobuf::Empty* response) {
+        grpc::CallbackServerContext* context,
+        const core::v1::SetAutoFocusRequest* request,
+        google::protobuf::Empty* response) {
         return handleGrpcSyncRequest(context, request, response,
             [this](const core::v1::SetAutoFocusRequest* req, google::protobuf::Empty*) {
-                return request_handler_.enableAutoFocus(req->enable());
+                return request_handler_.enableAutoFocus(req->camera_id(), req->enable());
             });
     }
 
     grpc::ServerUnaryReactor* GrpcCallbackHandler::SetStabilization(
-    grpc::CallbackServerContext* context,
-    const core::v1::SetStabilizationRequest* request,
-    google::protobuf::Empty* response) {
+        grpc::CallbackServerContext* context,
+        const core::v1::SetStabilizationRequest* request,
+        google::protobuf::Empty* response) {
         return handleGrpcSyncRequest(context, request, response,
             [this](const core::v1::SetStabilizationRequest* req, google::protobuf::Empty*) {
-                return request_handler_.stabilize(req->enable());
+                return request_handler_.stabilize(req->camera_id(), req->enable());
             });
     }
 } // namespace service::api

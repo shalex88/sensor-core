@@ -2,10 +2,8 @@
 
 #include <filesystem>
 #include <memory>
-#include <optional>
 #include <string>
 #include <unordered_map>
-#include <vector>
 #include <yaml-cpp/yaml.h>
 
 namespace service::common {
@@ -17,22 +15,24 @@ namespace service::common {
     };
 
     struct CoreConfig {
-        std::string camera;
+        void validate() const;
+    };
+
+    struct ServiceInstance {
+        uint32_t id;
+        std::string address;
 
         void validate() const;
     };
 
-    struct EndpointConfig {
-        std::string address;
-        std::unordered_map<std::string, std::string> configuration;
+    struct ClientConfig {
+        std::vector<ServiceInstance> instances; // multiple instances for load balancing/failover
 
         void validate() const;
     };
 
     struct InfrastructureConfig {
-        std::string camera;
-        std::vector<EndpointConfig> endpoints;
-        std::optional<int> video_channel;
+        std::unordered_map<std::string, ClientConfig> clients; // service name -> ClientConfig
 
         void validate() const;
     };
@@ -62,7 +62,6 @@ namespace service::common {
         void loadFromFile(const std::filesystem::path& filename) const;
         void validateConfiguration() const;
         void loadApiConfig(const YAML::Node& app_node) const;
-        void loadCoreConfig(const YAML::Node& app_node) const;
         void loadInfrastructureConfig(const YAML::Node& app_node) const;
         void loadAppConfig(const YAML::Node& app_node) const;
 

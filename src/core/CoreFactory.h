@@ -3,19 +3,14 @@
 #include <memory>
 
 namespace service::common {
-    struct CoreConfig;
+    struct InfrastructureConfig;
 } // namespace service::common
-
-namespace service::infrastructure {
-    class ICamera;
-} // namespace service::infrastructure
 
 namespace service::core {
     class ICore;
 
     class CoreFactory {
     public:
-        static std::unique_ptr<ICore> createCore(
-            std::unique_ptr<infrastructure::ICamera> camera, const common::CoreConfig& config);
+        static std::unique_ptr<ICore> createCore(const common::InfrastructureConfig& config);
     };
 } // namespace service::core

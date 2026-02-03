@@ -13,19 +13,19 @@ namespace service::api {
         virtual Result<void> stop() = 0;
         virtual bool isRunning() const = 0;
 
-        virtual Result<void> setZoom(common::types::zoom zoom_level) const = 0;
-        virtual Result<common::types::zoom> getZoom() const = 0;
-        virtual Result<void> goToMinZoom() const = 0;
-        virtual Result<void> goToMaxZoom() const = 0;
+        virtual Result<void> setZoom(uint32_t camera_id, common::types::zoom zoom_level) const = 0;
+        virtual Result<common::types::zoom> getZoom(uint32_t camera_id) const = 0;
+        virtual Result<void> goToMinZoom(uint32_t camera_id) const = 0;
+        virtual Result<void> goToMaxZoom(uint32_t camera_id) const = 0;
 
-        virtual Result<void> setFocus(common::types::focus focus_value) const = 0;
-        virtual Result<common::types::focus> getFocus() const = 0;
-        virtual Result<void> enableAutoFocus(bool on) const = 0;
+        virtual Result<void> setFocus(uint32_t camera_id, common::types::focus focus_value) const = 0;
+        virtual Result<common::types::focus> getFocus(uint32_t camera_id) const = 0;
+        virtual Result<void> enableAutoFocus(uint32_t camera_id, bool on) const = 0;
 
-        virtual Result<common::types::info> getInfo() const = 0;
+        virtual Result<common::types::info> getInfo(uint32_t camera_id) const = 0;
 
-        virtual Result<void> stabilize(bool on) const = 0;
+        virtual Result<void> stabilize(uint32_t camera_id, bool on) const = 0;
 
-        virtual Result<common::capabilities::CapabilityList> getCapabilities() const = 0;
+        virtual Result<common::capabilities::CapabilityList> getCapabilities(uint32_t camera_id) const = 0;
     };
 }

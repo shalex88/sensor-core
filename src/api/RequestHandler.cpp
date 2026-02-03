@@ -50,14 +50,14 @@ namespace service::api {
         return running_;
     }
 
-    Result<void> RequestHandler::setZoom(const common::types::zoom zoom_level) const {
+    Result<void> RequestHandler::setZoom(uint32_t camera_id, const common::types::zoom zoom_level) const {
         if (!isRunning()) {
             return Result<void>::error("RequestHandler is not running");
         }
 
-        LOG_INFO("Request: {} {}", __func__, zoom_level);
+        LOG_INFO("Request: {} camera_id={} zoom={}", __func__, camera_id, zoom_level);
 
-        auto operation = core_->setZoom(zoom_level);
+        auto operation = core_->setZoom(camera_id, zoom_level);
 
         if (operation.isError()) {
             LOG_ERROR("Response: {}", operation.error());
@@ -68,14 +68,14 @@ namespace service::api {
         return operation;
     }
 
-    Result<common::types::zoom> RequestHandler::getZoom() const {
+    Result<common::types::zoom> RequestHandler::getZoom(uint32_t camera_id) const {
         if (!isRunning()) {
             return Result<common::types::zoom>::error("Request Handler is not running");
         }
 
-        LOG_INFO("Request: {}", __func__);
+        LOG_INFO("Request: {} camera_id={}", __func__, camera_id);
 
-        auto operation = core_->getZoom();
+        auto operation = core_->getZoom(camera_id);
 
         if (operation.isError()) {
             LOG_ERROR("Response: {}", operation.error());
@@ -86,14 +86,14 @@ namespace service::api {
         return operation;
     }
 
-    Result<void> RequestHandler::goToMinZoom() const {
+    Result<void> RequestHandler::goToMinZoom(uint32_t camera_id) const {
         if (!isRunning()) {
             return Result<void>::error("Request Handler is not running");
         }
 
-        LOG_INFO("Request: {}", __func__);
+        LOG_INFO("Request: {} camera_id={}", __func__, camera_id);
 
-        auto operation = core_->goToMinZoom();
+        auto operation = core_->goToMinZoom(camera_id);
 
         if (operation.isError()) {
             LOG_ERROR("Response: {}", operation.error());
@@ -104,14 +104,14 @@ namespace service::api {
         return operation;
     }
 
-    Result<void> RequestHandler::goToMaxZoom() const {
+    Result<void> RequestHandler::goToMaxZoom(uint32_t camera_id) const {
         if (!isRunning()) {
             return Result<void>::error("Request Handler is not running");
         }
 
-        LOG_INFO("Request: {}", __func__);
+        LOG_INFO("Request: {} camera_id={}", __func__, camera_id);
 
-        auto operation = core_->goToMaxZoom();
+        auto operation = core_->goToMaxZoom(camera_id);
 
         if (operation.isError()) {
             LOG_ERROR("Response: {}", operation.error());
@@ -122,14 +122,14 @@ namespace service::api {
         return operation;
     }
 
-    Result<void> RequestHandler::setFocus(const common::types::focus focus_value) const {
+    Result<void> RequestHandler::setFocus(uint32_t camera_id, const common::types::focus focus_value) const {
         if (!isRunning()) {
             return Result<void>::error("Request Handler is not running");
         }
 
-        LOG_INFO("Request: {} {}", __func__, focus_value);
+        LOG_INFO("Request: {} camera_id={} focus={}", __func__, camera_id, focus_value);
 
-        auto operation = core_->setFocus(focus_value);
+        auto operation = core_->setFocus(camera_id, focus_value);
 
         if (operation.isError()) {
             LOG_ERROR("Response: {}", operation.error());
@@ -140,14 +140,14 @@ namespace service::api {
         return operation;
     }
 
-    Result<common::types::focus> RequestHandler::getFocus() const {
+    Result<common::types::focus> RequestHandler::getFocus(uint32_t camera_id) const {
         if (!isRunning()) {
             return Result<common::types::focus>::error("Request Handler is not running");
         }
 
-        LOG_INFO("Request: {}", __func__);
+        LOG_INFO("Request: {} camera_id={}", __func__, camera_id);
 
-        auto operation = core_->getFocus();
+        auto operation = core_->getFocus(camera_id);
 
         if (operation.isError()) {
             LOG_ERROR("Response: {}", operation.error());
@@ -158,14 +158,14 @@ namespace service::api {
         return operation;
     }
 
-    Result<void> RequestHandler::enableAutoFocus(bool on) const {
+    Result<void> RequestHandler::enableAutoFocus(uint32_t camera_id, bool on) const {
         if (!isRunning()) {
             return Result<void>::error("Request Handler is not running");
         }
 
-        LOG_INFO("Request: {} {}", __func__, on);
+        LOG_INFO("Request: {} camera_id={} enable={}", __func__, camera_id, on);
 
-        auto operation = core_->enableAutoFocus(on);
+        auto operation = core_->enableAutoFocus(camera_id, on);
         if (operation.isError()) {
             LOG_ERROR("Response: {}", operation.error());
         } else {
@@ -175,14 +175,14 @@ namespace service::api {
         return operation;
     }
 
-    Result<common::types::info> RequestHandler::getInfo() const {
+    Result<common::types::info> RequestHandler::getInfo(uint32_t camera_id) const {
         if (!isRunning()) {
             return Result<common::types::info>::error("Request Handler is not running");
         }
 
-        LOG_INFO("Request: {}", __func__);
+        LOG_INFO("Request: {} camera_id={}", __func__, camera_id);
 
-        auto operation = core_->getInfo();
+        auto operation = core_->getInfo(camera_id);
 
         if (operation.isError()) {
             LOG_ERROR("Response: {}", operation.error());
@@ -193,14 +193,14 @@ namespace service::api {
         return operation;
     }
 
-    Result<void> RequestHandler::stabilize(const bool on) const {
+    Result<void> RequestHandler::stabilize(uint32_t camera_id, const bool on) const {
         if (!isRunning()) {
             return Result<void>::error("Request Handler is not running");
         }
 
-        LOG_INFO("Request: {} {}", __func__, on);
+        LOG_INFO("Request: {} camera_id={} enable={}", __func__, camera_id, on);
 
-        auto operation = core_->stabilize(on);
+        auto operation = core_->stabilize(camera_id, on);
         if (operation.isError()) {
             LOG_ERROR("Response: {}", operation.error());
         } else {
@@ -210,14 +210,14 @@ namespace service::api {
         return operation;
     }
 
-    Result<common::capabilities::CapabilityList> RequestHandler::getCapabilities() const {
+    Result<common::capabilities::CapabilityList> RequestHandler::getCapabilities(uint32_t camera_id) const {
         if (!isRunning()) {
             return Result<common::capabilities::CapabilityList>::error("Request Handler is not running");
         }
 
-        LOG_INFO("Request: {}", __func__);
+        LOG_INFO("Request: {} camera_id={}", __func__, camera_id);
 
-        auto operation = core_->getCapabilities();
+        auto operation = core_->getCapabilities(camera_id);
         if (operation.isError()) {
             LOG_ERROR("Response: {}", operation.error());
         } else {

@@ -4,7 +4,15 @@ app:
   api:
     api_type: grpc
     server_address: 0.0.0.0:50051
-  core:
-    camera: core
   infrastructure:
-    camera: fake_simple
+    clients:
+      camera_service:
+        instances:
+          - id: 0
+            address: 0.0.0.0:50052
+          - id: 1
+            address: 0.0.0.0:50053
+          - id: 2
+            address: 0.0.0.0:50054
+          - id: 3
+            address: 0.0.0.0:50055

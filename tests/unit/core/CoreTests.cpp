@@ -2,294 +2,120 @@
 #include <gmock/gmock.h>
 /* Add your project include files here */
 #include "core/Core.h"
-#include "../../Mocks.h"
+#include "common/config/ConfigManager.h"
 #include "common/types/Result.h"
-#include "common/types/CameraCapabilities.h"
+
+using namespace testing;
 
 class CoreTests : public Test {
 protected:
-    CoreTests() {
-        camera = std::make_unique<MockCameraHal>();
+    common::InfrastructureConfig createValidConfig() {
+        common::InfrastructureConfig config;
+        common::ClientConfig camera_service;
+        common::ServiceInstance instance;
+        instance.id = 0;
+        instance.address = "localhost:50052";
+        camera_service.instances.push_back(instance);
+        config.clients.emplace("camera_service", camera_service);
+        return config;
     }
-    std::unique_ptr<MockCameraHal> camera;
+
+    common::InfrastructureConfig createEmptyConfig() {
+        return common::InfrastructureConfig{};
+    }
 };
 
-TEST_F(CoreTests, CanBeCreated) {
-    EXPECT_NO_THROW(core::Core(std::move(camera)));
+TEST_F(CoreTests, CanBeCreatedWithValidConfig) {
+    const auto config = createValidConfig();
+    EXPECT_NO_THROW(core::Core core(config));
 }
 
-TEST_F(CoreTests, ThrowsOnNullCamera) {
-    EXPECT_THROW(core::Core(nullptr), std::invalid_argument);
+TEST_F(CoreTests, CanBeCreatedWithEmptyConfig) {
+    const auto config = createEmptyConfig();
+    EXPECT_NO_THROW(core::Core core(config));
 }
 
-TEST_F(CoreTests, InitializeSuccessWhenDisconnected) {
-    EXPECT_CALL(*camera, isConnected())
-        .WillOnce(Return(false))
-        .WillOnce(Return(true)); // for shutdown
-    EXPECT_CALL(*camera, open())
-        .WillOnce(Return(Result<void>::success()));
-    EXPECT_CALL(*camera, close())
-        .WillOnce(Return(Result<void>::success()));
-
-    core::Core core(std::move(camera));
+TEST_F(CoreTests, StartsSuccessfully) {
+    const auto config = createValidConfig();
+    core::Core core(config);
     const auto result = core.start();
-    ASSERT_TRUE(result.isSuccess()) << "Failed to initialize: " << result.error();
+    ASSERT_TRUE(result.isSuccess()) << "Failed to start: " << result.error();
 }
 
-TEST_F(CoreTests, InitializeSuccessWhenAlreadyConnected) {
-    EXPECT_CALL(*camera, isConnected())
-        .WillOnce(Return(true))
-        .WillOnce(Return(true)); // for shutdown
-    EXPECT_CALL(*camera, close())
-        .WillOnce(Return(Result<void>::success()));
-
-    core::Core core(std::move(camera));
-    const auto result = core.start();
-    ASSERT_TRUE(result.isSuccess()) << "Failed to initialize: " << result.error();
-}
-
-TEST_F(CoreTests, InitializeFailsOnConnectError) {
-    EXPECT_CALL(*camera, isConnected())
-        .WillOnce(Return(false));
-    EXPECT_CALL(*camera, open())
-        .WillOnce(Return(Result<void>::error("Failed to open")));
-
-    core::Core core(std::move(camera));
-    const auto result = core.start();
-    ASSERT_TRUE(result.isError());
-    EXPECT_THAT(result.error(), ::testing::HasSubstr("Failed to open"));
-}
-
-TEST_F(CoreTests, ZoomOperationsSuccess) {
-    // Set up all expectations before moving the camera
-    EXPECT_CALL(*camera, isConnected())
-        .WillOnce(Return(false))
-        .WillOnce(Return(true)); // for shutdown
-    EXPECT_CALL(*camera, open())
-        .WillOnce(Return(Result<void>::success()));
-    EXPECT_CALL(*camera, setZoom(2))
-        .WillOnce(Return(Result<void>::success()));
-    EXPECT_CALL(*camera, getZoom())
-        .WillOnce(Return(Result<common::types::zoom>::success(2u)));
-    EXPECT_CALL(*camera, close())
-        .WillOnce(Return(Result<void>::success()));
-
-
-    // Now create the core with the moved camera
-    core::Core core(std::move(camera));
-    const auto init_result = core.start();
-    ASSERT_TRUE(init_result.isSuccess()) << "Failed to initialize: " << init_result.error();
-
-    const auto set_result = core.setZoom(2);
-    ASSERT_TRUE(set_result.isSuccess());
-
-    const auto get_result = core.getZoom();
-    ASSERT_TRUE(get_result.isSuccess());
-    EXPECT_EQ(get_result.value(), 2);
-}
-
-TEST_F(CoreTests, ZoomOperationsFailWhenNotInitialized) {
-    const core::Core core(std::move(camera));
-
-    // Operations should fail when not initialized
-    const auto set_result = core.setZoom(50);
-    ASSERT_TRUE(set_result.isError());
-    EXPECT_THAT(set_result.error(), ::testing::HasSubstr("not initialized"));
-
-    const auto get_result = core.getZoom();
-    ASSERT_TRUE(get_result.isError());
-    EXPECT_THAT(get_result.error(), ::testing::HasSubstr("not initialized"));
-}
-
-TEST_F(CoreTests, FocusOperations) {
-    // Set up all expectations before moving the camera
-    EXPECT_CALL(*camera, isConnected())
-        .WillOnce(Return(false))
-        .WillOnce(Return(true)); // for shutdown
-    EXPECT_CALL(*camera, open())
-        .WillOnce(Return(Result<void>::success()));
-    EXPECT_CALL(*camera, setFocus(1))
-        .WillOnce(Return(Result<void>::success()));
-    EXPECT_CALL(*camera, getFocus())
-        .WillOnce(Return(Result<common::types::focus>::success(1u)));
-    EXPECT_CALL(*camera, close())
-        .WillOnce(Return(Result<void>::success()));
-
-    // Now create the core with the moved camera
-    core::Core core(std::move(camera));
-    const auto init_result = core.start();
-    ASSERT_TRUE(init_result.isSuccess());
-
-    const auto set_result = core.setFocus(1);
-    ASSERT_TRUE(set_result.isSuccess());
-
-    const auto get_result = core.getFocus();
-    ASSERT_TRUE(get_result.isSuccess());
-    EXPECT_EQ(get_result.value(), 1);
-}
-
-TEST_F(CoreTests, FocusOperationsFailWhenNotInitialized) {
-    const core::Core core(std::move(camera));
-
-    // Operations should fail when not initialized
-    const auto set_result = core.setFocus(50);
-    ASSERT_TRUE(set_result.isError());
-    EXPECT_THAT(set_result.error(), ::testing::HasSubstr("not initialized"));
-
-    const auto get_result = core.getFocus();
-    ASSERT_TRUE(get_result.isError());
-    EXPECT_THAT(get_result.error(), ::testing::HasSubstr("not initialized"));
-}
-
-TEST_F(CoreTests, ShutdownSuccess) {
-    EXPECT_CALL(*camera, isConnected())
-        .WillOnce(Return(false))  // initialize
-        .WillOnce(Return(true));  // shutdown
-    EXPECT_CALL(*camera, open())
-        .WillOnce(Return(Result<void>::success()));
-    EXPECT_CALL(*camera, close())
-        .WillOnce(Return(Result<void>::success()));
-
-    core::Core core(std::move(camera));
-    const auto init_result = core.start();
-    ASSERT_TRUE(init_result.isSuccess()) << "Failed to initialize: " << init_result.error();
-
-    const auto shutdown_result = core.stop();
-    ASSERT_TRUE(shutdown_result.isSuccess()) << "Failed to shut down: " << shutdown_result.error();
-}
-
-TEST_F(CoreTests, ShutdownWhenNotInitializedSuccess) {
-    core::Core core(std::move(camera));
-    const auto shutdown_result = core.stop();
-    ASSERT_TRUE(shutdown_result.isSuccess());
-}
-
-TEST_F(CoreTests, ShutdownWhenCameraDisconnectFailsFails) {
-    EXPECT_CALL(*camera, isConnected())
-        .WillOnce(Return(false))
-        .WillOnce(Return(true));
-    EXPECT_CALL(*camera, open())
-        .WillOnce(Return(Result<void>::success()));
-    EXPECT_CALL(*camera, close())
-        .WillOnce(Return(Result<void>::error("Failed to close")));
-
-    core::Core core(std::move(camera));
-    const auto init_result = core.start();
-    ASSERT_TRUE(init_result.isSuccess());
-
-    const auto shutdown_result = core.stop();
-    ASSERT_TRUE(shutdown_result.isError());
-    EXPECT_EQ(shutdown_result.error(), "Failed to close");
-}
-
-TEST_F(CoreTests, GetInfoSuccess) {
-    EXPECT_CALL(*camera, isConnected())
-        .WillOnce(Return(false))
-        .WillOnce(Return(true));
-    EXPECT_CALL(*camera, open())
-        .WillOnce(Return(Result<void>::success()));
-    EXPECT_CALL(*camera, getInfo())
-        .WillOnce(Return(Result<common::types::info>::success(std::string("Test Camera Info"))));
-    EXPECT_CALL(*camera, close())
-        .WillOnce(Return(Result<void>::success()));
-
-    core::Core core(std::move(camera));
+TEST_F(CoreTests, StopsSuccessfully) {
+    const auto config = createValidConfig();
+    core::Core core(config);
     ASSERT_TRUE(core.start().isSuccess());
-
-    const auto info_result = core.getInfo();
-    ASSERT_TRUE(info_result.isSuccess());
-    EXPECT_EQ(info_result.value(), "Test Camera Info");
+    const auto result = core.stop();
+    ASSERT_TRUE(result.isSuccess()) << "Failed to stop: " << result.error();
 }
 
-TEST_F(CoreTests, GetInfoFailsWhenNotInitialized) {
-    const core::Core core(std::move(camera));
-
-    const auto info_result = core.getInfo();
-    ASSERT_TRUE(info_result.isError());
-    EXPECT_THAT(info_result.error(), ::testing::HasSubstr("not initialized"));
-}
-
-TEST_F(CoreTests, EnableAutoFocusSuccess) {
-    EXPECT_CALL(*camera, isConnected())
-        .WillOnce(Return(false))
-        .WillOnce(Return(true));
-    EXPECT_CALL(*camera, open())
-        .WillOnce(Return(Result<void>::success()));
-    EXPECT_CALL(*camera, enableAutoFocus(true))
-        .WillOnce(Return(Result<void>::success()));
-    EXPECT_CALL(*camera, close())
-        .WillOnce(Return(Result<void>::success()));
-
-    core::Core core(std::move(camera));
-    ASSERT_TRUE(core.start().isSuccess());
-
-    const auto af_result = core.enableAutoFocus(true);
-    ASSERT_TRUE(af_result.isSuccess());
-}
-
-TEST_F(CoreTests, EnableAutoFocusFailsWhenNotInitialized) {
-    const core::Core core(std::move(camera));
-
-    const auto af_result = core.enableAutoFocus(true);
-    ASSERT_TRUE(af_result.isError());
-    EXPECT_THAT(af_result.error(), ::testing::HasSubstr("not initialized"));
-}
-
-TEST_F(CoreTests, StabilizeSuccess) {
-    EXPECT_CALL(*camera, isConnected())
-        .WillOnce(Return(false))
-        .WillOnce(Return(true));
-    EXPECT_CALL(*camera, open())
-        .WillOnce(Return(Result<void>::success()));
-    EXPECT_CALL(*camera, stabilize(true))
-        .WillOnce(Return(Result<void>::success()));
-    EXPECT_CALL(*camera, close())
-        .WillOnce(Return(Result<void>::success()));
-
-    core::Core core(std::move(camera));
-    ASSERT_TRUE(core.start().isSuccess());
-
-    const auto result = core.stabilize(true);
+TEST_F(CoreTests, StopsWhenNotStartedSuccessfully) {
+    const auto config = createValidConfig();
+    core::Core core(config);
+    const auto result = core.stop();
     ASSERT_TRUE(result.isSuccess());
 }
 
-TEST_F(CoreTests, StabilizeFailsWhenNotInitialized) {
-    const core::Core core(std::move(camera));
+TEST_F(CoreTests, ZoomOperationsFailWhenNotInitialized) {
+    const auto config = createValidConfig();
+    const core::Core core(config);
 
-    const auto result = core.stabilize(true);
+    // Operations should fail when not initialized (not started)
+    const auto set_result = core.setZoom(0, 50);
+    ASSERT_TRUE(set_result.isError());
+    EXPECT_THAT(set_result.error(), ::testing::HasSubstr("not initialized"));
+
+    const auto get_result = core.getZoom(0);
+    ASSERT_TRUE(get_result.isError());
+    EXPECT_THAT(get_result.error(), ::testing::HasSubstr("not initialized"));
+}
+
+TEST_F(CoreTests, FocusOperationsFailWhenNotInitialized) {
+    const auto config = createValidConfig();
+    const core::Core core(config);
+
+    const auto set_result = core.setFocus(0, 50);
+    ASSERT_TRUE(set_result.isError());
+    EXPECT_THAT(set_result.error(), ::testing::HasSubstr("not initialized"));
+
+    const auto get_result = core.getFocus(0);
+    ASSERT_TRUE(get_result.isError());
+    EXPECT_THAT(get_result.error(), ::testing::HasSubstr("not initialized"));
+}
+
+TEST_F(CoreTests, InfoOperationFailsWhenNotInitialized) {
+    const auto config = createValidConfig();
+    const core::Core core(config);
+
+    const auto result = core.getInfo(0);
     ASSERT_TRUE(result.isError());
     EXPECT_THAT(result.error(), ::testing::HasSubstr("not initialized"));
 }
 
-TEST_F(CoreTests, GetCapabilitiesSuccess) {
-    EXPECT_CALL(*camera, isConnected())
-        .WillOnce(Return(false))
-        .WillOnce(Return(true));
-    EXPECT_CALL(*camera, open())
-        .WillOnce(Return(Result<void>::success()));
+TEST_F(CoreTests, AutoFocusOperationFailsWhenNotInitialized) {
+    const auto config = createValidConfig();
+    const core::Core core(config);
 
-    const common::capabilities::CapabilityList expected {
-        common::capabilities::Capability::Zoom,
-        common::capabilities::Capability::Focus};
+    const auto result = core.enableAutoFocus(0, true);
+    ASSERT_TRUE(result.isError());
+    EXPECT_THAT(result.error(), ::testing::HasSubstr("not initialized"));
+}
 
-    EXPECT_CALL(*camera, getCapabilities())
-        .WillOnce(Return(Result<common::capabilities::CapabilityList>::success(expected)));
+TEST_F(CoreTests, StabilizeOperationFailsWhenNotInitialized) {
+    const auto config = createValidConfig();
+    const core::Core core(config);
 
-    EXPECT_CALL(*camera, close())
-        .WillOnce(Return(Result<void>::success()));
-
-    core::Core core(std::move(camera));
-    ASSERT_TRUE(core.start().isSuccess());
-
-    const auto result = core.getCapabilities();
-    ASSERT_TRUE(result.isSuccess());
-    EXPECT_EQ(result.value(), expected);
+    const auto result = core.stabilize(0, true);
+    ASSERT_TRUE(result.isError());
+    EXPECT_THAT(result.error(), ::testing::HasSubstr("not initialized"));
 }
 
 TEST_F(CoreTests, GetCapabilitiesFailsWhenNotInitialized) {
-    const core::Core core(std::move(camera));
+    const auto config = createValidConfig();
+    const core::Core core(config);
 
-    const auto result = core.getCapabilities();
+    const auto result = core.getCapabilities(0);
     ASSERT_TRUE(result.isError());
     EXPECT_THAT(result.error(), ::testing::HasSubstr("not initialized"));
 }

@@ -5,42 +5,35 @@
 #include "common/config/ConfigManager.h"
 
 #include "core/Core.h"
-#include "../../Mocks.h"
 #include "common/types/Result.h"
+
+using namespace testing;
 
 class CoreFactoryTests : public Test {
 protected:
-    CoreFactoryTests() {
-        core_ = std::make_unique<MockCameraHal>();
+    common::InfrastructureConfig createValidConfig() {
+        common::InfrastructureConfig config;
+        common::ClientConfig camera_service;
+        common::ServiceInstance instance;
+        instance.id = 0;
+        instance.address = "localhost:50052";
+        camera_service.instances.push_back(instance);
+        config.clients.emplace("camera_service", camera_service);
+        return config;
     }
-    std::unique_ptr<MockCameraHal> core_;
 };
 
-TEST_F(CoreFactoryTests, CreateCameraCoreSuccess) {
-    common::CoreConfig config;
-    config.camera = "core";
-
-    const auto core = core::CoreFactory::createCore(std::move(core_), config);
+TEST_F(CoreFactoryTests, CreateCoreSuccess) {
+    const auto config = createValidConfig();
+    const auto core = core::CoreFactory::createCore(config);
     ASSERT_NE(nullptr, core);
     ASSERT_TRUE(dynamic_cast<core::Core*>(core.get()) != nullptr);
 }
 
-TEST_F(CoreFactoryTests, ThrowsOnUnknownType) {
-    common::CoreConfig config;
-    config.camera = "invalid_camera";
-
-    EXPECT_THROW(
-        core::CoreFactory::createCore(std::move(core_), config),
-        std::invalid_argument
-    );
+TEST_F(CoreFactoryTests, CreateCoreWithEmptyClients) {
+    common::InfrastructureConfig config;
+    const auto core = core::CoreFactory::createCore(config);
+    ASSERT_NE(nullptr, core);
+    ASSERT_TRUE(dynamic_cast<core::Core*>(core.get()) != nullptr);
 }
 
-TEST_F(CoreFactoryTests, ThrowsOnNullCamera) {
-    common::CoreConfig config;
-    config.camera = "nfov";
-
-    EXPECT_THROW(
-        core::CoreFactory::createCore(nullptr, config),
-        std::invalid_argument
-    );
-}
