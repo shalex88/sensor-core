@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 /* Add your project include files here */
@@ -29,13 +30,16 @@ public:
     MOCK_METHOD(Result<void>, setFocus, (uint32_t, common::types::focus), (const, override));
     MOCK_METHOD(Result<common::types::focus>, getFocus, (uint32_t), (const, override));
     MOCK_METHOD(Result<void>, enableAutoFocus, (uint32_t, bool), (const, override));
+    MOCK_METHOD(Result<bool>, getAutoFocus, (uint32_t), (const, override));
     MOCK_METHOD(Result<common::types::info>, getInfo, (uint32_t), (const, override));
     MOCK_METHOD(Result<void>, goToMinZoom, (uint32_t), (const, override));
     MOCK_METHOD(Result<void>, goToMaxZoom, (uint32_t), (const, override));
     MOCK_METHOD(Result<void>, stabilize, (uint32_t, bool), (const, override));
+    MOCK_METHOD(Result<bool>, getStabilization, (uint32_t), (const, override));
     MOCK_METHOD(Result<common::capabilities::CapabilityList>, getCapabilities, (uint32_t), (const, override));
-    MOCK_METHOD(Result<void>, enableOptionalElement, (uint32_t, const std::string&), (const, override));
-    MOCK_METHOD(Result<void>, disableOptionalElement, (uint32_t, const std::string&), (const, override));
+    MOCK_METHOD(Result<void>, SetVideoCapabilityState, (uint32_t, const std::string&, bool), (const, override));
+    MOCK_METHOD(Result<std::vector<std::string>>, getVideoCapabilities, (uint32_t), (const, override));
+    MOCK_METHOD(Result<bool>, getVideoCapabilityState, (uint32_t, const std::string&), (const, override));
 };
 
 class CoreMock: public core::ICore {
@@ -51,9 +55,12 @@ public:
     MOCK_METHOD(Result<common::types::focus>, getFocus, (uint32_t), (const, override));
     MOCK_METHOD(Result<common::types::info>, getInfo, (uint32_t), (const, override));
     MOCK_METHOD(Result<void>, enableAutoFocus, (uint32_t, bool), (const, override));
+    MOCK_METHOD(Result<bool>, getAutoFocus, (uint32_t), (const, override));
     MOCK_METHOD(Result<void>, stabilize, (uint32_t, bool), (const, override));
+    MOCK_METHOD(Result<bool>, getStabilization, (uint32_t), (const, override));
     MOCK_METHOD(Result<common::capabilities::CapabilityList>, getCapabilities, (uint32_t), (const, override));
-    MOCK_METHOD(Result<void>, enableOptionalElement, (uint32_t, const std::string&), (const, override));
-    MOCK_METHOD(Result<void>, disableOptionalElement, (uint32_t, const std::string&), (const, override));
+    MOCK_METHOD(Result<void>, SetVideoCapabilityState, (uint32_t, const std::string&, bool), (const, override));
+    MOCK_METHOD(Result<std::vector<std::string>>, getVideoCapabilities, (uint32_t), (const, override));
+    MOCK_METHOD(Result<bool>, getVideoCapabilityState, (uint32_t, const std::string&), (const, override));
 
 };

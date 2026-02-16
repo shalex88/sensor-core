@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include <grpcpp/client_context.h>
 #include <grpcpp/channel.h>
 
@@ -14,11 +15,12 @@ namespace service::infrastructure {
         ~VideoServiceClient() override = default;
 
         // Video operations
-        Result<void> enableOptionalElement(const std::string& element) override;
-        Result<void> disableOptionalElement(const std::string& element) override;
+        Result<void> SetVideoCapabilityState(const std::string& capability, bool enable) override;
+        Result<bool> getVideoCapabilityState(const std::string& capability) override;
+        Result<std::vector<std::string>> getVideoCapabilities() override;
 
     private:
-        std::unique_ptr<video::VideoService::Stub> stub_;
+        std::unique_ptr<video::v1::VideoService::Stub> stub_;
 
         /**
          * Helper to handle gRPC call results

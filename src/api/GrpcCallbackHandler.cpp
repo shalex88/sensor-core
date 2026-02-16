@@ -203,6 +203,21 @@ namespace service::api {
             });
     }
 
+    grpc::ServerUnaryReactor* GrpcCallbackHandler::GetAutoFocus(
+        grpc::CallbackServerContext* context,
+        const core::v1::GetAutoFocusRequest* request,
+        core::v1::GetAutoFocusResponse* response) {
+        return handleGrpcSyncRequest(context, request, response,
+            [this](const core::v1::GetAutoFocusRequest* req, core::v1::GetAutoFocusResponse* resp) {
+                const auto result = request_handler_.getAutoFocus(req->camera_id());
+                if (result.isSuccess()) {
+                    resp->set_enable(result.value());
+                    return Result<void>::success();
+                }
+                return Result<void>::error(result.error());
+            });
+    }
+
     grpc::ServerUnaryReactor* GrpcCallbackHandler::SetStabilization(
         grpc::CallbackServerContext* context,
         const core::v1::SetStabilizationRequest* request,
@@ -213,23 +228,63 @@ namespace service::api {
             });
     }
 
-    grpc::ServerUnaryReactor* GrpcCallbackHandler::EnableOptionalElement(
+    grpc::ServerUnaryReactor* GrpcCallbackHandler::GetStabilization(
         grpc::CallbackServerContext* context,
-        const core::v1::EnableOptionalElementRequest* request,
-        core::v1::EnableOptionalElementResponse* response) {
+        const core::v1::GetStabilizationRequest* request,
+        core::v1::GetStabilizationResponse* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const core::v1::EnableOptionalElementRequest* req, core::v1::EnableOptionalElementResponse*) {
-                return request_handler_.enableOptionalElement(req->camera_id(), req->element());
+            [this](const core::v1::GetStabilizationRequest* req, core::v1::GetStabilizationResponse* resp) {
+                const auto result = request_handler_.getStabilization(req->camera_id());
+                if (result.isSuccess()) {
+                    resp->set_enable(result.value());
+                    return Result<void>::success();
+                }
+                return Result<void>::error(result.error());
             });
     }
 
-    grpc::ServerUnaryReactor* GrpcCallbackHandler::DisableOptionalElement(
+    grpc::ServerUnaryReactor* GrpcCallbackHandler::SetVideoCapabilityState(
         grpc::CallbackServerContext* context,
-        const core::v1::DisableOptionalElementRequest* request,
-        core::v1::DisableOptionalElementResponse* response) {
+        const core::v1::SetVideoCapabilityStateRequest* request,
+        google::protobuf::Empty* response) {
         return handleGrpcSyncRequest(context, request, response,
-            [this](const core::v1::DisableOptionalElementRequest* req, core::v1::DisableOptionalElementResponse*) {
-                return request_handler_.disableOptionalElement(req->camera_id(), req->element());
+            [this](const core::v1::SetVideoCapabilityStateRequest* req, google::protobuf::Empty*) {
+                return request_handler_.SetVideoCapabilityState(req->camera_id(), req->capability(), req->enable());
+            });
+    }
+
+    grpc::ServerUnaryReactor* GrpcCallbackHandler::GetVideoCapabilities(
+        grpc::CallbackServerContext* context,
+        const core::v1::GetVideoCapabilitiesRequest* request,
+        core::v1::GetVideoCapabilitiesResponse* response) {
+        return handleGrpcSyncRequest(context, request, response,
+            [this](const core::v1::GetVideoCapabilitiesRequest* req, core::v1::GetVideoCapabilitiesResponse* resp) {
+                const auto result = request_handler_.getVideoCapabilities(req->camera_id());
+                if (result.isError()) {
+                    return Result<void>::error(result.error());
+                }
+
+                for (const auto& capability : result.value()) {
+                    resp->add_capabilities(capability);
+                }
+
+                return Result<void>::success();
+            });
+    }
+
+    grpc::ServerUnaryReactor* GrpcCallbackHandler::GetVideoCapabilityState(
+        grpc::CallbackServerContext* context,
+        const core::v1::GetVideoCapabilityStateRequest* request,
+        core::v1::GetVideoCapabilityStateResponse* response) {
+        return handleGrpcSyncRequest(context, request, response,
+            [this](const core::v1::GetVideoCapabilityStateRequest* req, core::v1::GetVideoCapabilityStateResponse* resp) {
+                const auto result = request_handler_.getVideoCapabilityState(req->camera_id(), req->capability());
+                if (result.isError()) {
+                    return Result<void>::error(result.error());
+                }
+
+                resp->set_enable(result.value());
+                return Result<void>::success();
             });
     }
 } // namespace service::api

@@ -15,7 +15,7 @@ protected:
         service::common::InfrastructureConfig config;
         service::common::ClientConfig camera_service;
         service::common::ServiceInstance instance;
-        instance.id = 0;
+        instance.id = 1;
         instance.address = "localhost:50052";
         camera_service.instances.push_back(instance);
         config.clients.emplace("camera_service", camera_service);

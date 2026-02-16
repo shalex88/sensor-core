@@ -54,21 +54,36 @@ namespace service::api {
             const core::v1::SetAutoFocusRequest* request,
             google::protobuf::Empty* response) override;
 
+        grpc::ServerUnaryReactor* GetAutoFocus(
+            grpc::CallbackServerContext* context,
+            const core::v1::GetAutoFocusRequest* request,
+            core::v1::GetAutoFocusResponse* response) override;
+
         grpc::ServerUnaryReactor* SetStabilization(
             grpc::CallbackServerContext* context,
             const core::v1::SetStabilizationRequest* request,
             google::protobuf::Empty* response) override;
 
-        // Video operations
-        grpc::ServerUnaryReactor* EnableOptionalElement(
+        grpc::ServerUnaryReactor* GetStabilization(
             grpc::CallbackServerContext* context,
-            const core::v1::EnableOptionalElementRequest* request,
-            core::v1::EnableOptionalElementResponse* response) override;
+            const core::v1::GetStabilizationRequest* request,
+            core::v1::GetStabilizationResponse* response) override;
 
-        grpc::ServerUnaryReactor* DisableOptionalElement(
+        // Video operations
+        grpc::ServerUnaryReactor* SetVideoCapabilityState(
             grpc::CallbackServerContext* context,
-            const core::v1::DisableOptionalElementRequest* request,
-            core::v1::DisableOptionalElementResponse* response) override;
+            const core::v1::SetVideoCapabilityStateRequest* request,
+            google::protobuf::Empty* response) override;
+
+        grpc::ServerUnaryReactor* GetVideoCapabilities(
+            grpc::CallbackServerContext* context,
+            const core::v1::GetVideoCapabilitiesRequest* request,
+            core::v1::GetVideoCapabilitiesResponse* response) override;
+
+        grpc::ServerUnaryReactor* GetVideoCapabilityState(
+            grpc::CallbackServerContext* context,
+            const core::v1::GetVideoCapabilityStateRequest* request,
+            core::v1::GetVideoCapabilityStateResponse* response) override;
 
     private:
         IRequestHandler& request_handler_;

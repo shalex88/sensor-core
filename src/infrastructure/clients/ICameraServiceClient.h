@@ -23,12 +23,14 @@ namespace service::infrastructure {
         virtual Result<void> setFocus(common::types::focus focus_value) = 0;
         virtual Result<common::types::focus> getFocus() = 0;
         virtual Result<void> enableAutoFocus(bool on) = 0;
+        virtual Result<bool> getAutoFocus() = 0;
 
         // Device info
         virtual Result<common::types::info> getInfo() = 0;
 
         // Advanced operations
         virtual Result<void> stabilize(bool on) = 0;
+        virtual Result<bool> getStabilization() = 0;
 
         // Capabilities
         virtual Result<common::capabilities::CapabilityList> getCapabilities() = 0;

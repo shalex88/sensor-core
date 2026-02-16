@@ -26,11 +26,19 @@
       }
     },
     {
+      "name": "native-release",
+      "displayName": "Native Release",
+      "inherits": "native-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
       "name": "cross-base",
       "hidden": true,
       "inherits": "base",
       "displayName": "Base Cross Compilation Preset",
-      "toolchainFile": "/mnt/bsp/bsp/sdk-orin-scarthgap/sysroots/x86_64-tdsdk-linux/usr/share/cmake/armv8a-oe4t-linux-toolchain.cmake"
+      "toolchainFile": "$env{CMAKE_TOOLCHAIN_FILE}"
     },
     {
       "name": "cross-debug",
@@ -39,16 +47,32 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
+    },
+    {
+      "name": "cross-release",
+      "displayName": "Cross Release",
+      "inherits": "cross-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
     }
   ],
   "buildPresets": [
     {
-      "name": "build-native-debug",
+      "name": "native-debug",
       "configurePreset": "native-debug"
     },
     {
-      "name": "build-cross-debug",
+      "name": "native-release",
+      "configurePreset": "native-release"
+    },
+    {
+      "name": "cross-debug",
       "configurePreset": "cross-debug"
+    },
+    {
+      "name": "cross-release",
+      "configurePreset": "cross-release"
     }
   ]
 }

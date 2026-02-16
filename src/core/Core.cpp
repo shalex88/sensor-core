@@ -157,6 +157,24 @@ namespace service::core {
         }
     }
 
+    Result<bool> Core::getAutoFocus(uint32_t camera_id) const {
+        if (!isRunning()) {
+            return Result<bool>::error("Core is not initialized");
+        }
+
+        try {
+            auto* client = client_manager_->getCameraServiceClient(camera_id);
+            if (!client) {
+                return Result<bool>::error("camera_service client for instance " + std::to_string(camera_id) +
+                                          " is not available");
+            }
+
+            return client->getAutoFocus();
+        } catch (const std::exception& e) {
+            return Result<bool>::error(std::string("getAutoFocus failed: ") + e.what());
+        }
+    }
+
     Result<common::types::info> Core::getInfo(uint32_t camera_id) const {
         if (!isRunning()) {
             return Result<common::types::info>::error("Core is not initialized");
@@ -193,6 +211,24 @@ namespace service::core {
         }
     }
 
+    Result<bool> Core::getStabilization(uint32_t camera_id) const {
+        if (!isRunning()) {
+            return Result<bool>::error("Core is not initialized");
+        }
+
+        try {
+            auto* client = client_manager_->getCameraServiceClient(camera_id);
+            if (!client) {
+                return Result<bool>::error("camera_service client for instance " + std::to_string(camera_id) +
+                                          " is not available");
+            }
+
+            return client->getStabilization();
+        } catch (const std::exception& e) {
+            return Result<bool>::error(std::string("getStabilization failed: ") + e.what());
+        }
+    }
+
     Result<common::capabilities::CapabilityList> Core::getCapabilities(uint32_t camera_id) const {
         if (!isRunning()) {
             return Result<common::capabilities::CapabilityList>::error("Core is not initialized");
@@ -213,7 +249,10 @@ namespace service::core {
         }
     }
 
-    Result<void> Core::enableOptionalElement(uint32_t camera_id, const std::string& element) const {
+    Result<void> Core::SetVideoCapabilityState(
+        uint32_t camera_id,
+        const std::string& capability,
+        const bool enable) const {
         if (!isRunning()) {
             return Result<void>::error("Core is not initialized");
         }
@@ -225,27 +264,49 @@ namespace service::core {
                                           " is not available");
             }
 
-            return client->enableOptionalElement(element);
+            return client->SetVideoCapabilityState(capability, enable);
         } catch (const std::exception& e) {
-            return Result<void>::error(std::string("enableOptionalElement failed: ") + e.what());
+            return Result<void>::error(std::string("SetVideoCapabilityState failed: ") + e.what());
         }
     }
 
-    Result<void> Core::disableOptionalElement(uint32_t camera_id, const std::string& element) const {
+    Result<std::vector<std::string>> Core::getVideoCapabilities(uint32_t camera_id) const {
         if (!isRunning()) {
-            return Result<void>::error("Core is not initialized");
+            return Result<std::vector<std::string>>::error("Core is not initialized");
         }
 
         try {
             auto* client = client_manager_->getVideoServiceClient(camera_id);
             if (!client) {
-                return Result<void>::error("video_service client for instance " + std::to_string(camera_id) +
-                                          " is not available");
+                return Result<std::vector<std::string>>::error(
+                    "video_service client for instance " + std::to_string(camera_id) +
+                    " is not available");
             }
 
-            return client->disableOptionalElement(element);
+            return client->getVideoCapabilities();
         } catch (const std::exception& e) {
-            return Result<void>::error(std::string("disableOptionalElement failed: ") + e.what());
+            return Result<std::vector<std::string>>::error(
+                std::string("getVideoCapabilities failed: ") + e.what());
+        }
+    }
+
+    Result<bool> Core::getVideoCapabilityState(uint32_t camera_id, const std::string& capability) const {
+        if (!isRunning()) {
+            return Result<bool>::error("Core is not initialized");
+        }
+
+        try {
+            auto* client = client_manager_->getVideoServiceClient(camera_id);
+            if (!client) {
+                return Result<bool>::error(
+                    "video_service client for instance " + std::to_string(camera_id) +
+                    " is not available");
+            }
+
+            return client->getVideoCapabilityState(capability);
+        } catch (const std::exception& e) {
+            return Result<bool>::error(
+                std::string("getVideoCapabilityState failed: ") + e.what());
         }
     }
 } // namespace service::core

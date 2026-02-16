@@ -15,6 +15,7 @@ service CoreService {
   rpc SetFocus (SetFocusRequest) returns (SetFocusResponse) {}
   rpc GetFocus (GetFocusRequest) returns (GetFocusResponse) {}
   rpc SetAutoFocus (SetAutoFocusRequest) returns (google.protobuf.Empty) {}
+  rpc GetAutoFocus (GetAutoFocusRequest) returns (GetAutoFocusResponse) {}
 
   // Device info
   rpc GetInfo (GetInfoRequest) returns (GetInfoResponse) {}
@@ -24,10 +25,12 @@ service CoreService {
 
   // Advanced operations
   rpc SetStabilization (SetStabilizationRequest) returns (google.protobuf.Empty) {}
+  rpc GetStabilization (GetStabilizationRequest) returns (GetStabilizationResponse) {}
 
   // Video operations
-  rpc EnableOptionalElement (EnableOptionalElementRequest) returns (EnableOptionalElementResponse) {}
-  rpc DisableOptionalElement (DisableOptionalElementRequest) returns (DisableOptionalElementResponse) {}
+  rpc GetVideoCapabilities (GetVideoCapabilitiesRequest) returns (GetVideoCapabilitiesResponse) {}
+  rpc SetVideoCapabilityState (SetVideoCapabilityStateRequest) returns (google.protobuf.Empty) {}
+  rpc GetVideoCapabilityState (GetVideoCapabilityStateRequest) returns (GetVideoCapabilityStateResponse) {}
 }
 
 // Zoom operations
@@ -83,6 +86,14 @@ message SetAutoFocusRequest {
   bool enable = 2;
 }
 
+message GetAutoFocusRequest {
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
+}
+
+message GetAutoFocusResponse {
+  bool enable = 1;
+}
+
 // Device info
 message GetInfoRequest {
   uint32 camera_id = 1; // camera instance ID [0 - 3]
@@ -116,19 +127,34 @@ message SetStabilizationRequest {
   bool enable = 2;
 }
 
+message GetStabilizationRequest {
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
+}
+
+message GetStabilizationResponse {
+  bool enable = 1;
+}
+
 // Video operations
-message EnableOptionalElementRequest {
+message GetVideoCapabilitiesRequest {
   uint32 camera_id = 1; // camera instance ID [0 - 3]
-  string element = 2;
 }
 
-message EnableOptionalElementResponse {
+message GetVideoCapabilitiesResponse {
+  repeated string capabilities = 1;
 }
 
-message DisableOptionalElementRequest {
+message SetVideoCapabilityStateRequest {
   uint32 camera_id = 1; // camera instance ID [0 - 3]
-  string element = 2;
+  string capability = 2;
+  bool enable = 3;
 }
 
-message DisableOptionalElementResponse {
+message GetVideoCapabilityStateRequest {
+  uint32 camera_id = 1; // camera instance ID [0 - 3]
+  string capability = 2;
+}
+
+message GetVideoCapabilityStateResponse {
+  bool enable = 1;
 }

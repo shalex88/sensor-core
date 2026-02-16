@@ -185,6 +185,26 @@ TEST_F(RequestHandlerTests, EnableAutoFocusFailsIfNotRunning) {
     ASSERT_TRUE(result.isError());
 }
 
+TEST_F(RequestHandlerTests, GetAutoFocusSuccess) {
+    EXPECT_CALL(*core, start())
+        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*core, getAutoFocus(0))
+        .WillOnce(Return(Result<bool>::success(true)));
+    EXPECT_CALL(*core, stop())
+        .WillOnce(Return(Result<void>::success()));
+
+    ASSERT_TRUE(request_handler->start().isSuccess());
+    const auto result = request_handler->getAutoFocus(0);
+    ASSERT_TRUE(result.isSuccess());
+    EXPECT_TRUE(result.value());
+    ASSERT_TRUE(request_handler->stop().isSuccess());
+}
+
+TEST_F(RequestHandlerTests, GetAutoFocusFailsIfNotRunning) {
+    const auto result = request_handler->getAutoFocus(0);
+    ASSERT_TRUE(result.isError());
+}
+
 TEST_F(RequestHandlerTests, GoToMinZoomSuccess) {
     EXPECT_CALL(*core, start())
         .WillOnce(Return(Result<void>::success()));
@@ -236,6 +256,26 @@ TEST_F(RequestHandlerTests, StabilizeSuccess) {
 
 TEST_F(RequestHandlerTests, StabilizeFailsIfNotRunning) {
     const auto result = request_handler->stabilize(0, true);
+    ASSERT_TRUE(result.isError());
+}
+
+TEST_F(RequestHandlerTests, GetStabilizationSuccess) {
+    EXPECT_CALL(*core, start())
+        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*core, getStabilization(0))
+        .WillOnce(Return(Result<bool>::success(true)));
+    EXPECT_CALL(*core, stop())
+        .WillOnce(Return(Result<void>::success()));
+
+    ASSERT_TRUE(request_handler->start().isSuccess());
+    const auto result = request_handler->getStabilization(0);
+    ASSERT_TRUE(result.isSuccess());
+    EXPECT_TRUE(result.value());
+    ASSERT_TRUE(request_handler->stop().isSuccess());
+}
+
+TEST_F(RequestHandlerTests, GetStabilizationFailsIfNotRunning) {
+    const auto result = request_handler->getStabilization(0);
     ASSERT_TRUE(result.isError());
 }
 
@@ -294,39 +334,61 @@ TEST_F(RequestHandlerTests, IsRunningFalseAfterStop) {
 }
 
 // Video operations tests
-TEST_F(RequestHandlerTests, EnableOptionalElementSuccess) {
+TEST_F(RequestHandlerTests, SetVideoCapabilityStateSuccess) {
     EXPECT_CALL(*core, start())
         .WillOnce(Return(Result<void>::success()));
-    EXPECT_CALL(*core, enableOptionalElement(0, "overlay"))
+    EXPECT_CALL(*core, SetVideoCapabilityState(0, "overlay", true))
         .WillOnce(Return(Result<void>::success()));
     EXPECT_CALL(*core, stop())
         .WillOnce(Return(Result<void>::success()));
 
     ASSERT_TRUE(request_handler->start().isSuccess());
-    ASSERT_TRUE(request_handler->enableOptionalElement(0, "overlay").isSuccess());
+    ASSERT_TRUE(request_handler->SetVideoCapabilityState(0, "overlay", true).isSuccess());
     ASSERT_TRUE(request_handler->stop().isSuccess());
 }
 
-TEST_F(RequestHandlerTests, EnableOptionalElementFailsIfNotRunning) {
-    const auto result = request_handler->enableOptionalElement(0, "overlay");
+TEST_F(RequestHandlerTests, SetVideoCapabilityStateFailsIfNotRunning) {
+    const auto result = request_handler->SetVideoCapabilityState(0, "overlay", true);
     ASSERT_TRUE(result.isError());
 }
 
-TEST_F(RequestHandlerTests, DisableOptionalElementSuccess) {
+TEST_F(RequestHandlerTests, GetVideoCapabilitiesSuccess) {
     EXPECT_CALL(*core, start())
         .WillOnce(Return(Result<void>::success()));
-    EXPECT_CALL(*core, disableOptionalElement(0, "overlay"))
-        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*core, getVideoCapabilities(0))
+        .WillOnce(Return(Result<std::vector<std::string>>::success({"overlay", "timestamp"})));
     EXPECT_CALL(*core, stop())
         .WillOnce(Return(Result<void>::success()));
 
     ASSERT_TRUE(request_handler->start().isSuccess());
-    ASSERT_TRUE(request_handler->disableOptionalElement(0, "overlay").isSuccess());
+    const auto result = request_handler->getVideoCapabilities(0);
+    ASSERT_TRUE(result.isSuccess());
+    EXPECT_EQ(result.value().size(), 2);
     ASSERT_TRUE(request_handler->stop().isSuccess());
 }
 
-TEST_F(RequestHandlerTests, DisableOptionalElementFailsIfNotRunning) {
-    const auto result = request_handler->disableOptionalElement(0, "overlay");
+TEST_F(RequestHandlerTests, GetVideoCapabilitiesFailsIfNotRunning) {
+    const auto result = request_handler->getVideoCapabilities(0);
+    ASSERT_TRUE(result.isError());
+}
+
+TEST_F(RequestHandlerTests, GetVideoCapabilityStateSuccess) {
+    EXPECT_CALL(*core, start())
+        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*core, getVideoCapabilityState(0, "overlay"))
+        .WillOnce(Return(Result<bool>::success(true)));
+    EXPECT_CALL(*core, stop())
+        .WillOnce(Return(Result<void>::success()));
+
+    ASSERT_TRUE(request_handler->start().isSuccess());
+    const auto result = request_handler->getVideoCapabilityState(0, "overlay");
+    ASSERT_TRUE(result.isSuccess());
+    EXPECT_EQ(result.value(), true);
+    ASSERT_TRUE(request_handler->stop().isSuccess());
+}
+
+TEST_F(RequestHandlerTests, GetVideoCapabilityStateFailsIfNotRunning) {
+    const auto result = request_handler->getVideoCapabilityState(0, "overlay");
     ASSERT_TRUE(result.isError());
 }
 

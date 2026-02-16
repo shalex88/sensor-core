@@ -15,6 +15,7 @@ service CameraService {
   rpc SetFocus (SetFocusRequest) returns (SetFocusResponse) {} //TODO: return current value after setting?
   rpc GetFocus (google.protobuf.Empty) returns (GetFocusResponse) {}
   rpc SetAutoFocus (SetAutoFocusRequest) returns (google.protobuf.Empty) {}
+  rpc GetAutoFocus (google.protobuf.Empty) returns (GetAutoFocusResponse) {}
 
   // Device info
   rpc GetInfo (google.protobuf.Empty) returns (GetInfoResponse) {}
@@ -24,6 +25,7 @@ service CameraService {
 
   // Advanced operations
   rpc SetStabilization (SetStabilizationRequest) returns (google.protobuf.Empty) {}
+  rpc GetStabilization (google.protobuf.Empty) returns (GetStabilizationResponse) {}
 }
 
 // Zoom operations
@@ -60,6 +62,10 @@ message SetAutoFocusRequest {
   bool enable = 1;
 }
 
+message GetAutoFocusResponse {
+  bool enable = 1;
+}
+
 // Device info
 message GetInfoResponse {
   string info = 1;
@@ -81,5 +87,9 @@ enum Capability {
 
 // Advanced operations
 message SetStabilizationRequest {
+  bool enable = 1;
+}
+
+message GetStabilizationResponse {
   bool enable = 1;
 }

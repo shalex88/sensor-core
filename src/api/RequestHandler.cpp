@@ -175,6 +175,24 @@ namespace service::api {
         return operation;
     }
 
+    Result<bool> RequestHandler::getAutoFocus(uint32_t camera_id) const {
+        if (!isRunning()) {
+            return Result<bool>::error("Request Handler is not running");
+        }
+
+        LOG_INFO("Request: {} camera_id={}", __func__, camera_id);
+
+        auto operation = core_->getAutoFocus(camera_id);
+
+        if (operation.isError()) {
+            LOG_ERROR("Response: {}", operation.error());
+        } else {
+            LOG_INFO("Response: {}", operation.value());
+        }
+
+        return operation;
+    }
+
     Result<common::types::info> RequestHandler::getInfo(uint32_t camera_id) const {
         if (!isRunning()) {
             return Result<common::types::info>::error("Request Handler is not running");
@@ -210,6 +228,23 @@ namespace service::api {
         return operation;
     }
 
+    Result<bool> RequestHandler::getStabilization(uint32_t camera_id) const {
+        if (!isRunning()) {
+            return Result<bool>::error("Request Handler is not running");
+        }
+
+        LOG_INFO("Request: {} camera_id={}", __func__, camera_id);
+
+        auto operation = core_->getStabilization(camera_id);
+        if (operation.isError()) {
+            LOG_ERROR("Response: {}", operation.error());
+        } else {
+            LOG_INFO("Response: {}", operation.value());
+        }
+
+        return operation;
+    }
+
     Result<common::capabilities::CapabilityList> RequestHandler::getCapabilities(uint32_t camera_id) const {
         if (!isRunning()) {
             return Result<common::capabilities::CapabilityList>::error("Request Handler is not running");
@@ -227,14 +262,22 @@ namespace service::api {
         return operation;
     }
 
-    Result<void> RequestHandler::enableOptionalElement(uint32_t camera_id, const std::string& element) const {
+    Result<void> RequestHandler::SetVideoCapabilityState(
+        uint32_t camera_id,
+        const std::string& capability,
+        const bool enable) const {
         if (!isRunning()) {
             return Result<void>::error("RequestHandler is not running");
         }
 
-        LOG_INFO("Request: {} camera_id={} element={}", __func__, camera_id, element);
+        LOG_INFO(
+            "Request: {} camera_id={} capability={} enable={}",
+            __func__,
+            camera_id,
+            capability,
+            enable);
 
-        auto operation = core_->enableOptionalElement(camera_id, element);
+        auto operation = core_->SetVideoCapabilityState(camera_id, capability, enable);
 
         if (operation.isError()) {
             LOG_ERROR("Response: {}", operation.error());
@@ -245,19 +288,39 @@ namespace service::api {
         return operation;
     }
 
-    Result<void> RequestHandler::disableOptionalElement(uint32_t camera_id, const std::string& element) const {
+    Result<std::vector<std::string>> RequestHandler::getVideoCapabilities(uint32_t camera_id) const {
         if (!isRunning()) {
-            return Result<void>::error("RequestHandler is not running");
+            return Result<std::vector<std::string>>::error("RequestHandler is not running");
         }
 
-        LOG_INFO("Request: {} camera_id={} element={}", __func__, camera_id, element);
+        LOG_INFO("Request: {} camera_id={}", __func__, camera_id);
 
-        auto operation = core_->disableOptionalElement(camera_id, element);
+        auto operation = core_->getVideoCapabilities(camera_id);
 
         if (operation.isError()) {
             LOG_ERROR("Response: {}", operation.error());
         } else {
-            LOG_INFO("Response: Success");
+            LOG_INFO("Response: {} capabilities", operation.value().size());
+        }
+
+        return operation;
+    }
+
+    Result<bool> RequestHandler::getVideoCapabilityState(
+        uint32_t camera_id,
+        const std::string& capability) const {
+        if (!isRunning()) {
+            return Result<bool>::error("RequestHandler is not running");
+        }
+
+        LOG_INFO("Request: {} camera_id={} capability={}", __func__, camera_id, capability);
+
+        auto operation = core_->getVideoCapabilityState(camera_id, capability);
+
+        if (operation.isError()) {
+            LOG_ERROR("Response: {}", operation.error());
+        } else {
+            LOG_INFO("Response: capability enabled={}", operation.value());
         }
 
         return operation;

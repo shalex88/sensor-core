@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "common/types/CameraTypes.h"
 #include "common/types/Result.h"
@@ -32,19 +33,25 @@ namespace service::core {
         Result<void> setFocus(uint32_t camera_id, common::types::focus focus_value) const override;
         Result<common::types::focus> getFocus(uint32_t camera_id) const override;
         Result<void> enableAutoFocus(uint32_t camera_id, bool on) const override;
+        Result<bool> getAutoFocus(uint32_t camera_id) const override;
 
         // Business methods for info operations
         Result<common::types::info> getInfo(uint32_t camera_id) const override;
 
         // Business methods for advanced operations
         Result<void> stabilize(uint32_t camera_id, bool on) const override;
+        Result<bool> getStabilization(uint32_t camera_id) const override;
 
         // Capability inquiry
         Result<common::capabilities::CapabilityList> getCapabilities(uint32_t camera_id) const override;
 
         // Video operations (routed by camera_id)
-        Result<void> enableOptionalElement(uint32_t camera_id, const std::string& element) const override;
-        Result<void> disableOptionalElement(uint32_t camera_id, const std::string& element) const override;
+        Result<void> SetVideoCapabilityState(
+            uint32_t camera_id,
+            const std::string& capability,
+            bool enable) const override;
+        Result<std::vector<std::string>> getVideoCapabilities(uint32_t camera_id) const override;
+        Result<bool> getVideoCapabilityState(uint32_t camera_id, const std::string& capability) const override;
 
     private:
         bool isRunning() const;

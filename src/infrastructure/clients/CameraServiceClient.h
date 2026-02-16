@@ -24,12 +24,14 @@ namespace service::infrastructure {
         Result<void> setFocus(common::types::focus focus_value) override;
         Result<common::types::focus> getFocus() override;
         Result<void> enableAutoFocus(bool on) override;
+        Result<bool> getAutoFocus() override;
 
         // Device info
         Result<common::types::info> getInfo() override;
 
         // Advanced operations
         Result<void> stabilize(bool on) override;
+        Result<bool> getStabilization() override;
 
         // Capabilities
         Result<common::capabilities::CapabilityList> getCapabilities() override;

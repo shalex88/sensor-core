@@ -92,6 +92,21 @@ namespace service::infrastructure {
         return handleGrpcVoidError(status, "SetAutoFocus");
     }
 
+    Result<bool> CameraServiceClient::getAutoFocus() {
+        google::protobuf::Empty request;
+        camera::v1::GetAutoFocusResponse response;
+        grpc::ClientContext context;
+
+        const auto status = stub_->GetAutoFocus(&context, request, &response);
+        if (!status.ok()) {
+            return Result<bool>::error(
+                std::string("camera_service.GetAutoFocus: ") + status.error_message()
+            );
+        }
+
+        return Result<bool>::success(response.enable());
+    }
+
     // Device info
     Result<common::types::info> CameraServiceClient::getInfo() {
         google::protobuf::Empty request;
@@ -117,6 +132,21 @@ namespace service::infrastructure {
 
         const auto status = stub_->SetStabilization(&context, request, &response);
         return handleGrpcVoidError(status, "SetStabilization");
+    }
+
+    Result<bool> CameraServiceClient::getStabilization() {
+        google::protobuf::Empty request;
+        camera::v1::GetStabilizationResponse response;
+        grpc::ClientContext context;
+
+        const auto status = stub_->GetStabilization(&context, request, &response);
+        if (!status.ok()) {
+            return Result<bool>::error(
+                std::string("camera_service.GetStabilization: ") + status.error_message()
+            );
+        }
+
+        return Result<bool>::success(response.enable());
     }
 
     // Capabilities

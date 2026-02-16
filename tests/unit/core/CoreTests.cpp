@@ -13,7 +13,7 @@ protected:
         service::common::InfrastructureConfig config;
         service::common::ClientConfig camera_service;
         service::common::ServiceInstance instance;
-        instance.id = 0;
+        instance.id = 1;
         instance.address = "localhost:50052";
         camera_service.instances.push_back(instance);
         config.clients.emplace("camera_service", camera_service);
@@ -62,11 +62,11 @@ TEST_F(CoreTests, ZoomOperationsFailWhenNotInitialized) {
     const service::core::Core core(config);
 
     // Operations should fail when not initialized (not started)
-    const auto set_result = core.setZoom(0, 50);
+    const auto set_result = core.setZoom(1, 50);
     ASSERT_TRUE(set_result.isError());
     EXPECT_THAT(set_result.error(), ::testing::HasSubstr("not initialized"));
 
-    const auto get_result = core.getZoom(0);
+    const auto get_result = core.getZoom(1);
     ASSERT_TRUE(get_result.isError());
     EXPECT_THAT(get_result.error(), ::testing::HasSubstr("not initialized"));
 }
@@ -75,11 +75,11 @@ TEST_F(CoreTests, FocusOperationsFailWhenNotInitialized) {
     const auto config = createValidConfig();
     const service::core::Core core(config);
 
-    const auto set_result = core.setFocus(0, 50);
+    const auto set_result = core.setFocus(1, 50);
     ASSERT_TRUE(set_result.isError());
     EXPECT_THAT(set_result.error(), ::testing::HasSubstr("not initialized"));
 
-    const auto get_result = core.getFocus(0);
+    const auto get_result = core.getFocus(1);
     ASSERT_TRUE(get_result.isError());
     EXPECT_THAT(get_result.error(), ::testing::HasSubstr("not initialized"));
 }
@@ -88,7 +88,7 @@ TEST_F(CoreTests, InfoOperationFailsWhenNotInitialized) {
     const auto config = createValidConfig();
     const service::core::Core core(config);
 
-    const auto result = core.getInfo(0);
+    const auto result = core.getInfo(1);
     ASSERT_TRUE(result.isError());
     EXPECT_THAT(result.error(), ::testing::HasSubstr("not initialized"));
 }
@@ -97,7 +97,7 @@ TEST_F(CoreTests, AutoFocusOperationFailsWhenNotInitialized) {
     const auto config = createValidConfig();
     const service::core::Core core(config);
 
-    const auto result = core.enableAutoFocus(0, true);
+    const auto result = core.enableAutoFocus(1, true);
     ASSERT_TRUE(result.isError());
     EXPECT_THAT(result.error(), ::testing::HasSubstr("not initialized"));
 }
@@ -106,7 +106,7 @@ TEST_F(CoreTests, StabilizeOperationFailsWhenNotInitialized) {
     const auto config = createValidConfig();
     const service::core::Core core(config);
 
-    const auto result = core.stabilize(0, true);
+    const auto result = core.stabilize(1, true);
     ASSERT_TRUE(result.isError());
     EXPECT_THAT(result.error(), ::testing::HasSubstr("not initialized"));
 }
@@ -115,7 +115,7 @@ TEST_F(CoreTests, GetCapabilitiesFailsWhenNotInitialized) {
     const auto config = createValidConfig();
     const service::core::Core core(config);
 
-    const auto result = core.getCapabilities(0);
+    const auto result = core.getCapabilities(1);
     ASSERT_TRUE(result.isError());
     EXPECT_THAT(result.error(), ::testing::HasSubstr("not initialized"));
 }
