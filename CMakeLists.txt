@@ -26,6 +26,8 @@ add_subdirectory(contracts/proto)
 find_package(spdlog CONFIG REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
+find_package(httplib CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
@@ -36,6 +38,8 @@ function(link_common_libraries target)
         spdlog::spdlog_header_only
         yaml-cpp::yaml-cpp
         CLI11::CLI11
+        httplib::httplib
+        nlohmann_json::nlohmann_json
     )
 endfunction(link_common_libraries)
 link_common_libraries(${PROJECT_NAME})

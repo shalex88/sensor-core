@@ -80,9 +80,4 @@ grpcui -plaintext 0.0.0.0:50051
 
 ## TODO
 
-- Add monitoring for lower layers to be able to stop execution requested by lower layers
-- Set Nagle's algorithm on TCP sockets?
-- Core still does almost nothing, it's config file is also unnecessary
-- Add noexcept contract for public methods
-- Add fixes-sized thread pool instead async
--
+- Build script should build via cmake preset

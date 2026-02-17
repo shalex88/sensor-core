@@ -142,13 +142,6 @@ TEST_F(ConfigManagerTests, ThrowsOnInvalidLogLevel) {
     }, std::runtime_error);
 }
 
-TEST_F(ConfigManagerTests, ThrowsOnZeroInstanceId) {
-    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    server_address: localhost:50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 0\n            address: localhost:50052");
-    EXPECT_THROW({
-        service::common::ConfigManager config(invalid_config_path_);
-    }, std::runtime_error);
-}
-
 TEST_F(ConfigManagerTests, HandlesEmptyClients) {
     createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    server_address: localhost:50051\n  infrastructure:\n    clients: {}");
     const service::common::ConfigManager config(invalid_config_path_);

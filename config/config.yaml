@@ -1,9 +1,9 @@
 app:
   name: sensor-core
-  log_level: info
+  log_level: debug
   api:
-    api_type: grpc
-    server_address: 0.0.0.0:50051
+    api_type: rest
+    server_address: 0.0.0.0:3000
   infrastructure:
     clients:
       camera_service:

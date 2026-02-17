@@ -5,6 +5,8 @@
     "spdlog",
     "yaml-cpp",
     "grpc",
-    "cli11"
+    "cli11",
+    "cpp-httplib",
+    "nlohmann-json"
   ]
 }

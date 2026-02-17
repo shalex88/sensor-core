@@ -9,7 +9,7 @@ info:
 
     '
 servers:
-- url: http://fronti-elsec.local:3000/api/v1
+- url: http://172.25.125.141:3000/api/v1
   description: API server
 paths:
   /health:
@@ -364,7 +364,7 @@ paths:
           description: Current state
           content:
             application/json:
-              schema: &id002
+              schema:
                 $ref: '#/components/schemas/ToggleState'
         '400':
           $ref: '#/components/responses/BadRequest400'
@@ -691,6 +691,11 @@ components:
       required:
       - error
       - message
+      example:
+        error: INTERNAL_ERROR
+        message: Internal error
+        traceId: c1f3a2d4e5
+        details: {}
     Focus:
       type: object
       properties:
@@ -814,13 +819,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiError'
-          examples:
-            internal:
-              summary: Unexpected server failure
-              value:
-                code: 13
-                message: internal error
-                details: []
     ApiError501:
       description: Not implemented
       content:

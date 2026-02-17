@@ -6,7 +6,7 @@
 #include <grpcpp/grpcpp.h>
 // #include <grpcpp/ext/proto_server_reflection_plugin.h>
 
-#include "api/GrpcCallbackHandler.h"
+#include "api/grpc/GrpcCallbackHandler.h"
 #include "api/IRequestHandler.h"
 #include "common/logger/Logger.h"
 

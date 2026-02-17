@@ -6,7 +6,7 @@
 namespace service::common {
 
     void ApiConfig::validate() const {
-        static const std::set<std::string> valid_apis{"grpc"};
+        static const std::set<std::string> valid_apis{"grpc", "rest"};
 
         if (api.empty()) {
             throw std::runtime_error("API type cannot be empty");
