@@ -22,7 +22,7 @@ include_directories(${PROJECT_NAME}
 
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "${SOURCE_DIR}/*.cpp")
 
-add_subdirectory(proto)
+add_subdirectory(contracts/proto)
 find_package(spdlog CONFIG REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)

@@ -1,0 +1,850 @@
+openapi: 3.1.0
+info:
+  title: Camera Control Backend API
+  version: 0.1.0
+  description: 'HTTP API for camera control and stream access.
+
+
+    **Base path:** `/api/v1` (included in server URL).
+
+    '
+servers:
+- url: http://fronti-elsec.local:3000/api/v1
+  description: API server
+paths:
+  /health:
+    get:
+      summary: Healthcheck
+      tags:
+      - System
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      operationId: getHealth
+  /cameras/{cameraId}/stream/url:
+    get:
+      summary: Get HLS stream URL for the camera
+      tags:
+      - Camera Streaming
+      responses:
+        '200':
+          description: Stream URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StreamUrl'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      operationId: getStreamUrl
+    parameters:
+    - name: cameraId
+      in: path
+      required: true
+      description: Camera index to target
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 3
+  /cameras/{cameraId}/info:
+    get:
+      summary: Get camera info
+      tags:
+      - Camera Control
+      responses:
+        '200':
+          description: Info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CameraInfo'
+        '400':
+          $ref: '#/components/responses/ApiError400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      operationId: getCameraInfo
+    parameters:
+    - name: cameraId
+      in: path
+      required: true
+      description: Camera index to target
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 3
+  /cameras/{cameraId}/capabilities:
+    get:
+      summary: Get camera capabilities
+      tags:
+      - Camera Control
+      responses:
+        '200':
+          description: Camera capabilities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Capabilities'
+        '400':
+          $ref: '#/components/responses/ApiError400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      operationId: getCapabilities
+    parameters:
+    - name: cameraId
+      in: path
+      required: true
+      description: Camera index to target
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 3
+  /cameras/{cameraId}/zoom:
+    get:
+      summary: Get current zoom
+      tags:
+      - Camera Control
+      responses:
+        '200':
+          description: Zoom value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Zoom'
+        '400':
+          $ref: '#/components/responses/ApiError400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      operationId: getZoom
+    parameters:
+    - name: cameraId
+      in: path
+      required: true
+      description: Camera index to target
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 3
+    put:
+      summary: Set zoom
+      tags:
+      - Camera Control
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Zoom'
+      responses:
+        '200':
+          description: Zoom set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Zoom'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      operationId: setZoom
+  /cameras/{cameraId}/zoom/min:
+    put:
+      summary: Move zoom to minimum
+      tags:
+      - Camera Control
+      responses:
+        '200':
+          description: Zoom moved to minimum
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      operationId: goToMinZoom
+    parameters:
+    - name: cameraId
+      in: path
+      required: true
+      description: Camera index to target
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 3
+  /cameras/{cameraId}/zoom/max:
+    put:
+      summary: Move zoom to maximum
+      tags:
+      - Camera Control
+      responses:
+        '200':
+          description: Zoom moved to maximum
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      operationId: goToMaxZoom
+    parameters:
+    - name: cameraId
+      in: path
+      required: true
+      description: Camera index to target
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 3
+  /cameras/{cameraId}/focus:
+    get:
+      summary: Get current focus
+      tags:
+      - Camera Control
+      responses:
+        '200':
+          description: Focus value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Focus'
+        '400':
+          $ref: '#/components/responses/ApiError400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      operationId: getFocus
+    parameters:
+    - name: cameraId
+      in: path
+      required: true
+      description: Camera index to target
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 3
+    put:
+      summary: Set focus
+      tags:
+      - Camera Control
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Focus'
+      responses:
+        '200':
+          description: Focus set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Focus'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+        '422':
+          $ref: '#/components/responses/ApiError422'
+      operationId: setFocus
+  /cameras/{cameraId}/autofocus:
+    parameters:
+    - name: cameraId
+      in: path
+      required: true
+      description: Camera index to target
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 3
+    get:
+      summary: Get autofocus state
+      tags:
+      - Camera Control
+      responses:
+        '200':
+          description: Current state
+          content:
+            application/json:
+              schema: &id002
+                $ref: '#/components/schemas/ToggleState'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      operationId: getAutofocus
+      description: Returns whether autofocus is currently enabled.
+    put:
+      summary: Enable/disable autofocus
+      tags:
+      - Camera Control
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ToggleState'
+      responses:
+        '200':
+          description: Autofocus set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToggleState'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      operationId: setAutofocus
+  /cameras/{cameraId}/stabilization:
+    parameters:
+    - name: cameraId
+      in: path
+      required: true
+      description: Camera index to target
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 3
+    get:
+      summary: Get camera stabilization state
+      description: Returns whether camera-level stabilization is currently enabled.
+      tags:
+      - Camera Control
+      operationId: getCameraStabilization
+      responses:
+        '200':
+          description: Current state
+          content:
+            application/json:
+              schema: &id001
+                $ref: '#/components/schemas/ToggleState'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+    put:
+      summary: Enable/disable camera stabilization
+      description: Controls camera-level stabilization.
+      tags:
+      - Camera Control
+      operationId: setCameraStabilization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: *id001
+      responses:
+        '200':
+          description: Camera stabilization set
+          content:
+            application/json:
+              schema: *id001
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+  /cameras/{cameraId}/video/capabilities:
+    parameters:
+    - name: cameraId
+      in: path
+      required: true
+      description: Camera index to target
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 3
+    get:
+      summary: Get enabled video capabilities
+      tags:
+      - Camera Video Processing
+      responses:
+        '200':
+          description: Enabled video capabilities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoCapabilities'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      operationId: getVideoCapabilities
+  /cameras/{cameraId}/video/capabilities/{capability}:
+    parameters:
+    - name: cameraId
+      in: path
+      required: true
+      description: Camera index to target
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 3
+    - name: capability
+      in: path
+      required: true
+      description: Video capability name to update
+      schema:
+        type: string
+    get:
+      summary: Get video capability state
+      description: Retrieves the current state (enabled/disabled) of a specific video capability.
+      tags:
+      - Camera Video Processing
+      responses:
+        '200':
+          description: Video capability state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToggleState'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      operationId: getVideoCapabilityState
+    put:
+      summary: Enable/disable a video capability
+      description: Controls a specific video capability by name.
+      tags:
+      - Camera Video Processing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ToggleState'
+      responses:
+        '200':
+          description: Video capability updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToggleState'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '404':
+          $ref: '#/components/responses/ApiError404'
+        '409':
+          $ref: '#/components/responses/ApiError409'
+        '501':
+          $ref: '#/components/responses/ApiError501'
+        '502':
+          $ref: '#/components/responses/ApiError502'
+        '503':
+          $ref: '#/components/responses/ApiError503'
+        '500':
+          $ref: '#/components/responses/ApiError500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      operationId: setVideoCapability
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+      required:
+      - status
+      example:
+        status: ok
+    StreamUrl:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          example: http://localhost:8888/camera1/index.m3u8
+      required:
+      - url
+      example:
+        url: http://camera.local/hls/stream.m3u8
+    CameraInfo:
+      type: object
+      properties:
+        info:
+          type: string
+      required:
+      - info
+      example:
+        info: 'Camera connected: true, firmware: 1.2.3'
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Validation failed
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              expected:
+                type: string
+              received:
+                type: string
+              path:
+                type: array
+                items:
+                  type: string
+              message:
+                type: string
+            required:
+            - code
+            - path
+            - message
+      required:
+      - error
+      - details
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Machine-readable error code
+          example: AUTOFOCUS_ENABLED
+        message:
+          type: string
+          example: Cannot set focus value while autofocus is enabled
+        traceId:
+          type: string
+          description: Correlation id for support/debugging
+          example: c1f3a2d4e5
+        details:
+          type: object
+          additionalProperties: true
+          description: Optional structured metadata for this error
+      required:
+      - error
+      - message
+    Focus:
+      type: object
+      properties:
+        focus:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Focus level (0-100).
+          example: 50
+      required:
+      - focus
+    Zoom:
+      type: object
+      properties:
+        zoom:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Zoom level (0-100).
+          example: 50
+      required:
+      - zoom
+    ToggleState:
+      type: object
+      description: Enable/disable state of a feature.
+      properties:
+        enable:
+          type: boolean
+          description: Whether the feature is enabled.
+          example: true
+      required:
+      - enable
+    Capability:
+      type: string
+      description: Supported camera capability.
+      enum:
+      - UNSPECIFIED
+      - ZOOM
+      - FOCUS
+      - AUTO_FOCUS
+      - INFO
+      - STABILIZATION
+      example: ZOOM
+    Capabilities:
+      type: object
+      description: List of camera capabilities.
+      properties:
+        capabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Capability'
+          description: Array of supported capabilities for the camera.
+          example:
+          - ZOOM
+          - FOCUS
+          - AUTO_FOCUS
+          - STABILIZATION
+      required:
+      - capabilities
+    VideoCapabilities:
+      type: object
+      description: List of currently enabled video capabilities.
+      properties:
+        capabilities:
+          type: array
+          items:
+            type: string
+          example:
+          - stabilization
+      required:
+      - capabilities
+  responses:
+    ValidationError400:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+    BadRequest400:
+      description: 'Bad request: validation error or semantic rejection'
+      content:
+        application/json:
+          schema:
+            anyOf:
+            - $ref: '#/components/schemas/ValidationError'
+            - $ref: '#/components/schemas/ApiError'
+    DefaultError:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    ApiError400:
+      description: Bad request (invalid input)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    ApiError404:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    ApiError409:
+      description: Conflict with current resource state
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    ApiError422:
+      description: Request understood but cannot be processed due to business rule
+        violation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    ApiError500:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            internal:
+              summary: Unexpected server failure
+              value:
+                code: 13
+                message: internal error
+                details: []
+    ApiError501:
+      description: Not implemented
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    ApiError502:
+      description: Bad gateway (upstream/proxy error)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    ApiError503:
+      description: Service unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+tags:
+- name: System
+  description: System endpoints (health, readiness).
+- name: Camera Streaming
+  description: Endpoints for camera video streaming.
+- name: Camera Control
+  description: Camera control and status endpoints.
+- name: Camera Video Processing
+  description: Video processing and enhancement controls.
