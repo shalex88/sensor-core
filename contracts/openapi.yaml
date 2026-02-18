@@ -629,7 +629,7 @@ components:
       required:
       - url
       example:
-        url: http://172.25.125.141:3000/camera1/index.m3u8
+        url: http://localhost:8888/camera1/index.m3u8
     CameraInfo:
       type: object
       properties:

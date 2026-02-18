@@ -90,9 +90,10 @@ namespace service::infrastructure {
         LOG_DEBUG("Initializing {} instance(s) of {}", service_config.instances.size(), service_name);
 
         for (const auto& instance : service_config.instances) {
-            LOG_DEBUG("Creating {} client for instance {} at {}", service_name, instance.id, instance.address);
+            const auto address = instance.server + ":" + std::to_string(instance.port);
+            LOG_DEBUG("Creating {} client for instance {} at {}", service_name, instance.id, address);
 
-            auto channel = createChannel(instance.address);
+            auto channel = createChannel(address);
             std::shared_ptr<grpc::ChannelInterface> channel_interface =
                 std::static_pointer_cast<grpc::ChannelInterface>(channel);
 

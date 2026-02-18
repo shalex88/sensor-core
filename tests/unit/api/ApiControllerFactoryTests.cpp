@@ -21,7 +21,8 @@ protected:
 TEST_F(ApiControllerFactoryTests, CreateGrpcServiceSuccess) {
     common::ApiConfig config;
     config.api = "grpc";
-    config.server_address = "localhost:50051";
+    config.server = "localhost";
+    config.port = 50051;
 
     const auto service = api::ApiControllerFactory::createController(std::move(core_), config);
     ASSERT_NE(nullptr, service);
@@ -31,7 +32,8 @@ TEST_F(ApiControllerFactoryTests, CreateGrpcServiceSuccess) {
 TEST_F(ApiControllerFactoryTests, ThrowsOnUnknownType) {
     common::ApiConfig config;
     config.api = "invalid_api";
-    config.server_address = "localhost:50051";
+    config.server = "localhost";
+    config.port = 50051;
 
     EXPECT_THROW(
         api::ApiControllerFactory::createController(std::move(core_), config),

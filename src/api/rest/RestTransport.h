@@ -18,14 +18,15 @@ namespace service::api {
         explicit RestTransport(IRequestHandler& request_handler);
         ~RestTransport() override;
 
-        Result<void> start(const std::string& server_address) override;
+        Result<void> start(const std::string& server, uint16_t port) override;
         Result<void> stop() override;
         Result<void> runLoop() override;
 
     private:
         IRequestHandler& request_handler_;
         std::unique_ptr<httplib::Server> server_;
-        std::string server_address_;
+        std::string host_{};
+        uint16_t port_{};
         bool is_running_{false};
 
         void setupRoutes() const;

@@ -8,17 +8,20 @@
 
 namespace service::api {
     ApiController::ApiController(std::unique_ptr<IRequestHandler> request_handler,
-                                 std::unique_ptr<ITransport> transport, std::string server_address)
+                                 std::unique_ptr<ITransport> transport, std::string server, uint16_t port)
         : request_handler_(std::move(request_handler)), transport_(std::move(transport)),
-          server_address_(std::move(server_address)), is_running_(false) {
+          server_(std::move(server)), port_(port), is_running_(false) {
         if (!request_handler_) {
             throw std::invalid_argument("Request Handler cannot be null");
         }
         if (!transport_) {
             throw std::invalid_argument("Transport cannot be null");
         }
-        if (server_address_.empty()) {
-            throw std::invalid_argument("Server address cannot be empty");
+        if (server_.empty()) {
+            throw std::invalid_argument("Server cannot be empty");
+        }
+        if (port_ == 0) {
+            throw std::invalid_argument("Port cannot be zero");
         }
     }
 
@@ -35,7 +38,7 @@ namespace service::api {
             return Result<void>::error(request_handler_result.error());
         }
 
-        if (const auto transport_result = transport_->start(server_address_); transport_result.isError()) {
+        if (const auto transport_result = transport_->start(server_, port_); transport_result.isError()) {
             if (const auto result = request_handler_->stop(); result.isError()) {
                 return Result<void>::error(result.error());
             }

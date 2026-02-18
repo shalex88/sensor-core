@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 
 #include "common/types/Result.h"
@@ -9,7 +10,7 @@ namespace service::api {
     public:
         virtual ~ITransport() = default;
 
-        virtual Result<void> start(const std::string& server_address) = 0;
+        virtual Result<void> start(const std::string& server, uint16_t port) = 0;
         virtual Result<void> stop() = 0;
         virtual Result<void> runLoop() = 0;
     };

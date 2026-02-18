@@ -15,7 +15,7 @@ using namespace testing;
 
 class TransportMock: public api::ITransport {
 public:
-    MOCK_METHOD(Result<void>, start, (const std::string&), (override));
+    MOCK_METHOD(Result<void>, start, (const std::string&, uint16_t), (override));
     MOCK_METHOD(Result<void>, stop, (), (override));
     MOCK_METHOD(Result<void>, runLoop, (), (override));
 };

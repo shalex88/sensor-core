@@ -17,7 +17,8 @@ protected:
 
     std::unique_ptr<api::RequestHandler> request_handler;
     std::unique_ptr<api::GrpcTransport> grpc_transport;
-    std::string server_address = "0.0.0.0:50051";
+    std::string server = "0.0.0.0";
+    uint16_t port = 50051;
 };
 
 TEST_F(GrpcTransportTests, CreationSuccess) {
@@ -25,13 +26,13 @@ TEST_F(GrpcTransportTests, CreationSuccess) {
 }
 
 TEST_F(GrpcTransportTests, StartServerSuccess) {
-    const auto result = grpc_transport->start(server_address);
+    const auto result = grpc_transport->start(server, port);
     ASSERT_TRUE(result.isSuccess());
     EXPECT_TRUE(grpc_transport->stop().isSuccess());
 }
 
 TEST_F(GrpcTransportTests, StartServerOnInvalidPortShouldFail) {
-    const auto result = grpc_transport->start("invalid_port");
+    const auto result = grpc_transport->start("", 0);
     ASSERT_TRUE(result.isError());
 }
 
@@ -42,7 +43,7 @@ TEST_F(GrpcTransportTests, StopServerWhenNotStartedShouldSucceed) {
 
 TEST_F(GrpcTransportTests, StopRunningServerShouldSucceed) {
     // Start server first
-    const auto start_result = grpc_transport->start(server_address);
+    const auto start_result = grpc_transport->start(server, port);
     ASSERT_TRUE(start_result.isSuccess());
 
     // Then stop it
@@ -52,7 +53,7 @@ TEST_F(GrpcTransportTests, StopRunningServerShouldSucceed) {
 
 TEST_F(GrpcTransportTests, StopServerMultipleTimesShouldSucceed) {
     // Start and stop once
-    EXPECT_TRUE(grpc_transport->start(server_address).isSuccess());
+    EXPECT_TRUE(grpc_transport->start(server, port).isSuccess());
     const auto first_stop = grpc_transport->stop();
     ASSERT_TRUE(first_stop.isSuccess());
 
@@ -68,7 +69,7 @@ TEST_F(GrpcTransportTests, RunLoopWithoutStartShouldFail) {
 
 TEST_F(GrpcTransportTests, RunLoopAfterStopShouldFail) {
     // Start and stop the server
-    EXPECT_TRUE(grpc_transport->start(server_address).isSuccess());
+    EXPECT_TRUE(grpc_transport->start(server, port).isSuccess());
     EXPECT_TRUE(grpc_transport->stop().isSuccess());
 
     // Try to run loop after stop
@@ -77,7 +78,7 @@ TEST_F(GrpcTransportTests, RunLoopAfterStopShouldFail) {
 }
 
 TEST_F(GrpcTransportTests, RunLoopWithRunningServerShouldSucceed) {
-    EXPECT_TRUE(grpc_transport->start(server_address).isSuccess());
+    EXPECT_TRUE(grpc_transport->start(server, port).isSuccess());
 
     std::jthread server_thread([&] {
         const auto result = grpc_transport->runLoop();
@@ -90,10 +91,10 @@ TEST_F(GrpcTransportTests, RunLoopWithRunningServerShouldSucceed) {
 }
 
 TEST_F(GrpcTransportTests, StartServerTwiceWithoutStopFails) {
-    EXPECT_TRUE(grpc_transport->start(server_address).isSuccess());
+    EXPECT_TRUE(grpc_transport->start(server, port).isSuccess());
 
     // Second start without stopping should fail
-    const auto second_start = grpc_transport->start(server_address);
+    const auto second_start = grpc_transport->start(server, port);
     ASSERT_TRUE(second_start.isError());
 
     // Cleanup
@@ -102,23 +103,21 @@ TEST_F(GrpcTransportTests, StartServerTwiceWithoutStopFails) {
 
 TEST_F(GrpcTransportTests, StartWithDifferentPortsSucceeds) {
     // Start on first port
-    const std::string first_port = "0.0.0.0:50052";
-    EXPECT_TRUE(grpc_transport->start(first_port).isSuccess());
+    EXPECT_TRUE(grpc_transport->start(server, 50052).isSuccess());
     EXPECT_TRUE(grpc_transport->stop().isSuccess());
 
     // Start on second port
-    const std::string second_port = "0.0.0.0:50053";
-    EXPECT_TRUE(grpc_transport->start(second_port).isSuccess());
+    EXPECT_TRUE(grpc_transport->start(server, 50053).isSuccess());
     EXPECT_TRUE(grpc_transport->stop().isSuccess());
 }
 
 TEST_F(GrpcTransportTests, StartWithEmptyAddressFails) {
-    const auto result = grpc_transport->start("");
+    const auto result = grpc_transport->start("", port);
     ASSERT_TRUE(result.isError());
 }
 
 TEST_F(GrpcTransportTests, StartWithInvalidFormatFails) {
-    const auto result = grpc_transport->start("not_a_valid_address");
+    const auto result = grpc_transport->start(server, 0);
     ASSERT_TRUE(result.isError());
 }
 

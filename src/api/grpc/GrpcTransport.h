@@ -13,7 +13,7 @@ namespace service::api {
         explicit GrpcTransport(IRequestHandler& request_handler);
         ~GrpcTransport() override;
 
-        Result<void> start(const std::string& server_address) override;
+        Result<void> start(const std::string& server, uint16_t port) override;
         Result<void> stop() override;
         Result<void> runLoop() override;
 

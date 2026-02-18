@@ -14,7 +14,7 @@ namespace service::api {
     class ApiController final {
     public:
     explicit ApiController(std::unique_ptr<IRequestHandler> request_handler,
-                   std::unique_ptr<ITransport> transport, std::string server_address);
+                   std::unique_ptr<ITransport> transport, std::string server, uint16_t port);
         ~ApiController();
 
         Result<void> startAsync();
@@ -24,7 +24,8 @@ namespace service::api {
     private:
         std::unique_ptr<IRequestHandler> request_handler_;
         std::unique_ptr<ITransport> transport_;
-        std::string server_address_;
+        std::string server_;
+        uint16_t port_;
         std::atomic<bool> is_running_;
         std::jthread service_thread_;
     };

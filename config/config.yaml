@@ -3,26 +3,35 @@ app:
   log_level: debug
   api:
     api_type: rest
-    server_address: 0.0.0.0:3000
+    server: 0.0.0.0
+    port: 3000
   infrastructure:
     clients:
       camera_service:
         instances:
           - id: 0
-            address: frontier-peripheral-ctrl-mpsoc.local:50050
+            server: frontier-peripheral-ctrl-mpsoc.local
+            port: 50050
           - id: 1
-            address: frontier-peripheral-ctrl-mpsoc.local:50051
+            server: frontier-peripheral-ctrl-mpsoc.local
+            port: 50051
           - id: 2
-            address: frontier-peripheral-ctrl-mpsoc.local:50052
+            server: frontier-peripheral-ctrl-mpsoc.local
+            port: 50052
           - id: 3
-            address: frontier-peripheral-ctrl-mpsoc.local:50053
+            server: frontier-peripheral-ctrl-mpsoc.local
+            port: 50053
       video_service:
         instances:
           - id: 0
-            address: localhost:50060
+            server: localhost
+            port: 50060
           - id: 1
-            address: localhost:50061
+            server: localhost
+            port: 50061
           - id: 2
-            address: localhost:50062
+            server: localhost
+            port: 50062
           - id: 3
-            address: localhost:50063
+            server: localhost
+            port: 50063

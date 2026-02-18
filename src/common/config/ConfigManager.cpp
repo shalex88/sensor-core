@@ -14,11 +14,11 @@ namespace service::common {
         if (!valid_apis.contains(api)) {
             throw std::runtime_error("Invalid API type: " + api);
         }
-        if (server_address.empty()) {
-            throw std::runtime_error("Server address cannot be empty");
+        if (server.empty()) {
+            throw std::runtime_error("Server cannot be empty");
         }
-        if (server_address.find(':') == std::string::npos) {
-            throw std::runtime_error("Server address must include port (format: host:port)");
+        if (port == 0) {
+            throw std::runtime_error("Port cannot be zero");
         }
     }
 
@@ -27,11 +27,11 @@ namespace service::common {
     }
 
     void ServiceInstance::validate() const {
-        if (address.empty()) {
-            throw std::runtime_error("Service instance address cannot be empty");
+        if (server.empty()) {
+            throw std::runtime_error("Service instance server cannot be empty");
         }
-        if (address.find(':') == std::string::npos) {
-            throw std::runtime_error("Service instance address must include port (format: host:port)");
+        if (port == 0) {
+            throw std::runtime_error("Service instance port cannot be zero");
         }
     }
 
@@ -116,8 +116,11 @@ namespace service::common {
             if (api_node["api_type"]) {
                 app_config_->api_config.api = api_node["api_type"].as<std::string>();
             }
-            if (api_node["server_address"]) {
-                app_config_->api_config.server_address = api_node["server_address"].as<std::string>();
+            if (api_node["server"]) {
+                app_config_->api_config.server = api_node["server"].as<std::string>();
+            }
+            if (api_node["port"]) {
+                app_config_->api_config.port = api_node["port"].as<uint16_t>();
             }
         }
     }
@@ -156,18 +159,24 @@ namespace service::common {
                     } else {
                         throw std::runtime_error("Service instance must have an 'id' field");
                     }
-                    if (instance_node["address"]) {
-                        instance.address = instance_node["address"].as<std::string>();
+                    if (instance_node["server"]) {
+                        instance.server = instance_node["server"].as<std::string>();
                     } else {
-                        throw std::runtime_error("Service instance must have an 'address' field");
+                        throw std::runtime_error("Service instance must have a 'server' field");
+                    }
+                    if (instance_node["port"]) {
+                        instance.port = instance_node["port"].as<uint16_t>();
+                    } else {
+                        throw std::runtime_error("Service instance must have a 'port' field");
                     }
                     client_config.instances.emplace_back(instance);
                 }
-            } else if (client_node["address"]) {
-                // Legacy: single address (for backwards compatibility)
+            } else if (client_node["server"] && client_node["port"]) {
+                // Legacy: single server and port (for backwards compatibility)
                 ServiceInstance instance;
                 instance.id = 0;
-                instance.address = client_node["address"].as<std::string>();
+                instance.server = client_node["server"].as<std::string>();
+                instance.port = client_node["port"].as<uint16_t>();
                 client_config.instances.emplace_back(instance);
             }
 

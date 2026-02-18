@@ -13,13 +13,14 @@ protected:
         request_handler = request_handler_ptr.get();
         transport = new NiceMock<TransportMock>();
         auto transport_obj = std::unique_ptr<api::ITransport>(transport);
-        controller = std::make_unique<api::ApiController>(std::move(request_handler_ptr), std::move(transport_obj), server_address);
+        controller = std::make_unique<api::ApiController>(std::move(request_handler_ptr), std::move(transport_obj), server, port);
     }
 
     NiceMock<RequestHandlerMock>* request_handler {};
     NiceMock<TransportMock>* transport {};
     std::unique_ptr<api::ApiController> controller;
-    std::string server_address = "50051";
+    std::string server = "localhost";
+    uint16_t port = 50051;
 };
 
 TEST_F(ApiControllerTests, CreationSuccess) {
@@ -30,21 +31,21 @@ TEST_F(ApiControllerTests, CreationFailNoController) {
     EXPECT_THROW(api::ApiController controller(
     nullptr,
     std::make_unique<NiceMock<TransportMock>>(),
-    server_address), std::invalid_argument);
+    server, port), std::invalid_argument);
 }
 
 TEST_F(ApiControllerTests, CreationFailNoTransport) {
     EXPECT_THROW(api::ApiController controller(
     std::make_unique<NiceMock<RequestHandlerMock>>(),
     nullptr,
-    server_address), std::invalid_argument);
+    server, port), std::invalid_argument);
 }
 
 TEST_F(ApiControllerTests, CreationFailEmptyPort) {
     EXPECT_THROW(api::ApiController controller(
     std::make_unique<NiceMock<RequestHandlerMock>>(),
     std::make_unique<NiceMock<TransportMock>>(),
-    ""), std::invalid_argument);
+    "", port), std::invalid_argument);
 }
 
 TEST_F(ApiControllerTests, StartStopSuccess) {
@@ -69,7 +70,7 @@ TEST_F(ApiControllerTests, StartFailOnRequestHandlerStartFail) {
 }
 
 TEST_F(ApiControllerTests, StartFailOnTransportStartFail) {
-    EXPECT_CALL(*transport, start(server_address))
+    EXPECT_CALL(*transport, start(server, port))
         .WillOnce(Return(Result<void>::error("Transport start failed")));
 
     const auto result = controller->startAsync();
@@ -119,7 +120,7 @@ TEST_F(ApiControllerTests, StartFailsWithEmptyServerAddress) {
     auto trans = std::make_unique<NiceMock<TransportMock>>();
 
     EXPECT_THROW(
-        api::ApiController ctrl(std::move(req_handler), std::move(trans), ""),
+        api::ApiController ctrl(std::move(req_handler), std::move(trans), "", port),
         std::invalid_argument
     );
 }
