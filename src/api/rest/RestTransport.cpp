@@ -1,10 +1,9 @@
 #include "RestTransport.h"
 
 #include <httplib.h>
-#include <nlohmann/json.hpp>
 #include <regex>
-#include <sstream>
 #include <stdexcept>
+#include <nlohmann/json.hpp>
 
 #include "api/IRequestHandler.h"
 #include "common/logger/Logger.h"
@@ -50,13 +49,6 @@ namespace service::api {
             sendJsonResponse(res, status_code, error_body);
         }
 
-        std::string parseJsonString(const json& obj, const std::string& key) {
-            if (!obj.contains(key) || !obj[key].is_string()) {
-                throw std::invalid_argument("Missing or invalid string field: " + key);
-            }
-            return obj[key].get<std::string>();
-        }
-
         uint32_t parseJsonUint(const json& obj, const std::string& key) {
             if (!obj.contains(key) || !obj[key].is_number_unsigned()) {
                 throw std::invalid_argument("Missing or invalid unsigned integer field: " + key);
@@ -92,13 +84,6 @@ namespace service::api {
 
         const auto host = server_address.substr(0, colon_pos);
         const auto port_str = server_address.substr(colon_pos + 1);
-
-        int port;
-        try {
-            port = std::stoi(port_str);
-        } catch (const std::exception& e) {
-            return Result<void>::error("Invalid port number: " + port_str);
-        }
 
         if (!server_) {
             return Result<void>::error("Server instance is null");
@@ -140,9 +125,9 @@ namespace service::api {
         const auto colon_pos = server_address_.find(':');
         const auto host = server_address_.substr(0, colon_pos);
         const auto port_str = server_address_.substr(colon_pos + 1);
-        const int port = std::stoi(port_str);
+        const auto port = std::stoi(port_str);
 
-        if (!server_->listen(host.c_str(), port)) {
+        if (!server_->listen(host, port)) {
             return Result<void>::error("Failed to listen on " + server_address_);
         }
 
@@ -150,7 +135,7 @@ namespace service::api {
         return Result<void>::success();
     }
 
-    void RestTransport::setupRoutes() {
+    void RestTransport::setupRoutes() const {
         server_->set_default_headers({
             {"Access-Control-Allow-Origin", CORS_ALLOW_ORIGIN},
             {"Access-Control-Allow-Methods", CORS_ALLOW_METHODS},
@@ -163,9 +148,9 @@ namespace service::api {
         });
 
         // GET /api/v1/health - Health check
-        server_->Get(std::string(API_BASE) + "/health", [this](const httplib::Request&, httplib::Response& res) {
+        server_->Get(std::string(API_BASE) + "/health", [](const httplib::Request&, httplib::Response& res) {
             json response = {
-                {"status", "ok"}
+                {"status", "ok"} //TODO: pass to core
             };
             sendJsonResponse(res, 200, response);
         });
@@ -175,8 +160,9 @@ namespace service::api {
             [this](const httplib::Request& req, httplib::Response& res) {
                 try {
                     const auto camera_id = extractCameraId(req.path);
+                    const auto stream_url = std::string("http://") + server_address_ + std::string("/camera") + std::to_string(camera_id) + "/index.m3u8";
                     json response = {
-                        {"url", "http://camera.local/hls/stream.m3u8"}
+                        {"url", stream_url}
                     };
                     sendJsonResponse(res, 200, response);
                 } catch (const std::exception& e) {

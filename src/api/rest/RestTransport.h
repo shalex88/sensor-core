@@ -28,6 +28,6 @@ namespace service::api {
         std::string server_address_;
         bool is_running_{false};
 
-        void setupRoutes();
+        void setupRoutes() const;
     };
 } // namespace service::api

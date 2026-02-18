@@ -626,11 +626,10 @@ components:
         url:
           type: string
           format: uri
-          example: http://localhost:8888/camera1/index.m3u8
       required:
       - url
       example:
-        url: http://camera.local/hls/stream.m3u8
+        url: http://172.25.125.141:3000/camera1/index.m3u8
     CameraInfo:
       type: object
       properties:
