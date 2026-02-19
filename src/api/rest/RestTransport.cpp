@@ -147,8 +147,7 @@ namespace service::api {
                      [this](const httplib::Request& req, httplib::Response& res) {
                          try {
                              const auto camera_id = extractCameraId(req.path);
-                             const auto stream_url = "http://" + host_ + ":8888" + "/camera" + std::to_string(camera_id)
-                                 + "/index.m3u8";
+                             const auto stream_url = "http://" + host_ + ":8889" + "/camera" + std::to_string(camera_id);
                              const json response = {{"url", stream_url}};
                              sendJsonResponse(res, 200, response);
                          } catch (const std::exception& e) {

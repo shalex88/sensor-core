@@ -81,3 +81,5 @@ grpcui -plaintext 0.0.0.0:50051
 ## TODO
 
 - Build script should build via cmake preset
+- Using Rest Camera capabilities are returned as integers
+-
