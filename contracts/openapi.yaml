@@ -9,7 +9,7 @@ info:
 
     '
 servers:
-- url: http://172.25.125.141:3000/api/v1
+- url: http://fronti-elsec.local:3000/api/v1
   description: API server
 paths:
   /health:

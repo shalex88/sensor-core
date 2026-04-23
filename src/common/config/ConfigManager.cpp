@@ -14,9 +14,6 @@ namespace service::common {
         if (!valid_apis.contains(api)) {
             throw std::runtime_error("Invalid API type: " + api);
         }
-        if (server.empty()) {
-            throw std::runtime_error("Server cannot be empty");
-        }
         if (port == 0) {
             throw std::runtime_error("Port cannot be zero");
         }
@@ -115,9 +112,6 @@ namespace service::common {
             const auto& api_node = app_node["api"];
             if (api_node["api_type"]) {
                 app_config_->api_config.api = api_node["api_type"].as<std::string>();
-            }
-            if (api_node["server"]) {
-                app_config_->api_config.server = api_node["server"].as<std::string>();
             }
             if (api_node["port"]) {
                 app_config_->api_config.port = api_node["port"].as<uint16_t>();

@@ -21,7 +21,6 @@ protected:
         config_file << "  log_level: info\n";
         config_file << "  api:\n";
         config_file << "    api_type: grpc\n";
-        config_file << "    server: localhost\n";
         config_file << "    port: 50051\n";
         config_file << "  infrastructure:\n";
         config_file << "    clients:\n";
@@ -54,7 +53,6 @@ TEST_F(ConfigManagerTests, LoadValidConfig) {
 
     const auto& api_config = config.getApiConfig();
     EXPECT_EQ(api_config.api, "grpc");
-    EXPECT_EQ(api_config.server, "localhost");
     EXPECT_EQ(api_config.port, 50051);
 
     const auto& infrastructure_config = config.getInfrastructureConfig();
@@ -85,32 +83,32 @@ TEST_F(ConfigManagerTests, ThrowsOnInvalidYaml) {
 }
 
 TEST_F(ConfigManagerTests, ThrowsOnInvalidApiType) {
-    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: invalid_api\n    server: localhost\n    port: 50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
+    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: invalid_api\n    port: 50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
     EXPECT_THROW({ service::common::ConfigManager config(invalid_config_path_);
     }, std::runtime_error);
 }
 
-TEST_F(ConfigManagerTests, ThrowsOnMissingServerAddress) {
+TEST_F(ConfigManagerTests, ThrowsOnMissingPort) {
     createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
     EXPECT_THROW({ service::common::ConfigManager config(invalid_config_path_);
     }, std::runtime_error);
 }
 
-TEST_F(ConfigManagerTests, ThrowsOnInvalidServerAddressFormat) {
-    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    server: localhost\n    port: 0\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
+TEST_F(ConfigManagerTests, ThrowsOnZeroPort) {
+    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    port: 0\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
     EXPECT_THROW({ service::common::ConfigManager config(invalid_config_path_);
     }, std::runtime_error);
 }
 
 TEST_F(ConfigManagerTests, ThrowsOnEmptyClientAddress) {
-    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    server: localhost\n    port: 50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: \"\"\n            port: 50052");
+    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    port: 50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: \"\"\n            port: 50052");
     EXPECT_THROW({
         service::common::ConfigManager config(invalid_config_path_);
     }, std::runtime_error);
 }
 
 TEST_F(ConfigManagerTests, HandlesAppName) {
-    createInvalidConfig("app:\n  name: demo\n  log_level: info\n  api:\n    api_type: grpc\n    server: localhost\n    port: 50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
+    createInvalidConfig("app:\n  name: demo\n  log_level: info\n  api:\n    api_type: grpc\n    port: 50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
     const service::common::ConfigManager config(invalid_config_path_);
 
     const auto& name = config.getAppName();
@@ -118,7 +116,7 @@ TEST_F(ConfigManagerTests, HandlesAppName) {
 }
 
 TEST_F(ConfigManagerTests, HandlesLogLevel) {
-    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    server: localhost\n    port: 50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
+    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    port: 50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
     const service::common::ConfigManager config(invalid_config_path_);
 
     const auto& log_level = config.getLogLevel();
@@ -126,28 +124,28 @@ TEST_F(ConfigManagerTests, HandlesLogLevel) {
 }
 
 TEST_F(ConfigManagerTests, ThrowsOnMissingAppName) {
-    createInvalidConfig("app:\n  log_level: info\n  api:\n    api_type: grpc\n    server: localhost\n    port: 50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
+    createInvalidConfig("app:\n  log_level: info\n  api:\n    api_type: grpc\n    port: 50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
     EXPECT_THROW({
         service::common::ConfigManager config(invalid_config_path_);
     }, std::runtime_error);
 }
 
 TEST_F(ConfigManagerTests, ThrowsOnMissingLogLevel) {
-    createInvalidConfig("app:\n  name: test\n  api:\n    api_type: grpc\n    server: localhost\n    port: 50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
+    createInvalidConfig("app:\n  name: test\n  api:\n    api_type: grpc\n    port: 50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
     EXPECT_THROW({
         service::common::ConfigManager config(invalid_config_path_);
     }, std::runtime_error);
 }
 
 TEST_F(ConfigManagerTests, ThrowsOnInvalidLogLevel) {
-    createInvalidConfig("app:\n  name: test\n  log_level: invalid_level\n  api:\n    api_type: grpc\n    server: localhost\n    port: 50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
+    createInvalidConfig("app:\n  name: test\n  log_level: invalid_level\n  api:\n    api_type: grpc\n    port: 50051\n  infrastructure:\n    clients:\n      camera_service:\n        instances:\n          - id: 1\n            server: localhost\n            port: 50052");
     EXPECT_THROW({
         service::common::ConfigManager config(invalid_config_path_);
     }, std::runtime_error);
 }
 
 TEST_F(ConfigManagerTests, HandlesEmptyClients) {
-    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    server: localhost\n    port: 50051\n  infrastructure:\n    clients: {}");
+    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    port: 50051\n  infrastructure:\n    clients: {}");
     const service::common::ConfigManager config(invalid_config_path_);
 
     const auto& infrastructure_config = config.getInfrastructureConfig();
@@ -155,7 +153,7 @@ TEST_F(ConfigManagerTests, HandlesEmptyClients) {
 }
 
 TEST_F(ConfigManagerTests, HandlesNoInfrastructureSection) {
-    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    server: localhost\n    port: 50051");
+    createInvalidConfig("app:\n  name: test\n  log_level: info\n  api:\n    api_type: grpc\n    port: 50051");
     const service::common::ConfigManager config(invalid_config_path_);
 
     const auto& infrastructure_config = config.getInfrastructureConfig();

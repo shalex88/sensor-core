@@ -62,7 +62,7 @@ namespace service::api {
         }
 
         is_running_ = true;
-        LOG_INFO("Server is listening on: {}", server_address); //TODO: show actual target ip
+        LOG_INFO("Server is listening on: {}", server_address);
         return Result<void>::success();
     }
 

@@ -10,8 +10,7 @@
 namespace service::common {
     struct ApiConfig {
         std::string api;
-        std::string server;
-        uint16_t port;
+        uint16_t port{0};
 
         void validate() const;
     };
@@ -23,7 +22,7 @@ namespace service::common {
     struct ServiceInstance {
         uint32_t id;
         std::string server;
-        uint16_t port;
+        uint16_t port{0};
 
         void validate() const;
     };

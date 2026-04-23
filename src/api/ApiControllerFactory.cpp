@@ -15,25 +15,21 @@ namespace service::api {
             throw std::invalid_argument("Core cannot be null");
         }
 
-        auto server = config.server;
-        if (server == "0.0.0.0") {
-            const auto ip_result = common::network::getPrimaryIpAddress();
-            if (ip_result.isError()) {
-                throw std::runtime_error("Failed to get device IP: " + ip_result.error());
-            }
-            server = ip_result.value();
+        const auto server_ip = common::network::getPrimaryIpAddress();
+        if (server_ip.isError()) {
+            throw std::runtime_error("Failed to get device IP: " + server_ip.error());
         }
 
         auto request_handler = std::make_unique<RequestHandler>(std::move(core));
 
         if (config.api == "grpc") {
             auto transport = std::make_unique<GrpcTransport>(*request_handler);
-            return std::make_unique<ApiController>(std::move(request_handler), std::move(transport), server, config.port);
+            return std::make_unique<ApiController>(std::move(request_handler), std::move(transport), server_ip.value(), config.port);
         }
 
         if (config.api == "rest") {
             auto transport = std::make_unique<RestTransport>(*request_handler);
-            return std::make_unique<ApiController>(std::move(request_handler), std::move(transport), server, config.port);
+            return std::make_unique<ApiController>(std::move(request_handler), std::move(transport), server_ip.value(), config.port);
         }
 
         throw std::invalid_argument("Unknown API controller type: " + config.api);

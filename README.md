@@ -82,4 +82,6 @@ grpcui -plaintext 0.0.0.0:50051
 
 - Build script should build via cmake preset
 - Using Rest Camera capabilities are returned as integers
--
+- Add connection to media-server
+- Query the media-server for the camera streaming status
+- When requested by user, return the camera stream url from the media-server
