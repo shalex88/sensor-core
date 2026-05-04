@@ -85,3 +85,4 @@ grpcui -plaintext 0.0.0.0:50051
 - Add connection to media-server
 - Query the media-server for the camera streaming status
 - When requested by user, return the camera stream url from the media-server
+- Install 'sudo apt install autoconf autoconf-archive automake libtool' for native build

@@ -38,17 +38,16 @@
       "hidden": true,
       "inherits": "base",
       "displayName": "Base Cross Compilation Preset",
-      "cacheVariables": {
-        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "$env{CMAKE_TOOLCHAIN_FILE}",
-        "VCPKG_TARGET_TRIPLET": "$env{VCPKG_TARGET_TRIPLET}"
-      }
+      "toolchainFile": "$env{CMAKE_TOOLCHAIN_FILE}"
     },
     {
       "name": "cross-debug",
       "displayName": "Cross Debug",
       "inherits": "cross-base",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_FLAGS_DEBUG": "-O0 -g3",
+        "CMAKE_CXX_FLAGS_DEBUG": "-O0 -g3"
       }
     },
     {

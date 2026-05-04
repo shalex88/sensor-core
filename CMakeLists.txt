@@ -1,8 +1,14 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.28)
 
 set(PROJECT_NAME sensor-core)
 include(cmake/SetVersion.cmake)
-include(cmake/EnableVcpkg.cmake)
+
+if(DEFINED ENV{CMAKE_TOOLCHAIN_FILE})
+    message(STATUS "Cross compilation")
+else()
+    message(STATUS "Native compilation")
+    include(cmake/EnableVcpkg.cmake)
+endif()
 
 project(${PROJECT_NAME} LANGUAGES CXX VERSION ${VERSION})
 add_compile_definitions(APP_NAME="${PROJECT_NAME}")
@@ -24,10 +30,16 @@ file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "${SOURCE_DIR}/*.cpp")
 
 add_subdirectory(contracts/proto)
 find_package(spdlog CONFIG REQUIRED)
-find_package(CLI11 CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
-find_package(httplib CONFIG REQUIRED)
+if(TARGET yaml-cpp::yaml-cpp)
+    set(YAML_CPP_TARGET yaml-cpp::yaml-cpp)
+elseif(TARGET yaml-cpp)
+    set(YAML_CPP_TARGET yaml-cpp)
+endif()
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(CLI11 CONFIG REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(MHD REQUIRED IMPORTED_TARGET libmicrohttpd)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
@@ -36,10 +48,10 @@ function(link_common_libraries target)
         PRIVATE
         proto
         spdlog::spdlog_header_only
-        yaml-cpp::yaml-cpp
-        CLI11::CLI11
-        httplib::httplib
         nlohmann_json::nlohmann_json
+        ${YAML_CPP_TARGET}
+        CLI11::CLI11
+        PkgConfig::MHD
     )
 endfunction(link_common_libraries)
 link_common_libraries(${PROJECT_NAME})
