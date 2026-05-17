@@ -9,7 +9,7 @@ info:
 
     '
 servers:
-- url: http://fronti-elsec.local:3000/api/v1
+- url: http://jetson-agx-orin-devkit.local:3000/api/v1
   description: API server
 paths:
   /health:
