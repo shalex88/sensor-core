@@ -34,14 +34,25 @@ namespace service::api {
         Result<bool> getAutoFocus(uint32_t camera_id) const override;
 
         Result<common::types::info> getInfo(uint32_t camera_id) const override;
+        Result<std::string> getStreamUrl(uint32_t camera_id) const override;
 
         Result<void> stabilize(uint32_t camera_id, bool on) const override;
         Result<bool> getStabilization(uint32_t camera_id) const override;
+        Result<common::types::zoom> setZoomAndGet(uint32_t camera_id, common::types::zoom zoom_level) const override;
+        Result<common::types::zoom> goToMinZoomAndGet(uint32_t camera_id) const override;
+        Result<common::types::zoom> goToMaxZoomAndGet(uint32_t camera_id) const override;
+        Result<common::types::focus> setFocusAndGet(uint32_t camera_id, common::types::focus focus_value) const override;
+        Result<bool> enableAutoFocusAndGet(uint32_t camera_id, bool on) const override;
+        Result<bool> stabilizeAndGet(uint32_t camera_id, bool on) const override;
 
         Result<common::capabilities::CapabilityList> getCapabilities(uint32_t camera_id) const override;
 
         // Video operations (routed by camera_id)
         Result<void> SetVideoCapabilityState(
+            uint32_t camera_id,
+            const std::string& capability,
+            bool enable) const override;
+        Result<bool> SetVideoCapabilityStateAndGet(
             uint32_t camera_id,
             const std::string& capability,
             bool enable) const override;

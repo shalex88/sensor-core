@@ -94,6 +94,15 @@ TEST_F(CoreTests, InfoOperationFailsWhenNotInitialized) {
     EXPECT_THAT(result.error(), ::testing::HasSubstr("not initialized"));
 }
 
+TEST_F(CoreTests, StreamUrlOperationFailsWhenNotInitialized) {
+    const auto config = createValidConfig();
+    const service::core::Core core(config);
+
+    const auto result = core.getStreamUrl(1);
+    ASSERT_TRUE(result.isError());
+    EXPECT_THAT(result.error(), ::testing::HasSubstr("not initialized"));
+}
+
 TEST_F(CoreTests, AutoFocusOperationFailsWhenNotInitialized) {
     const auto config = createValidConfig();
     const service::core::Core core(config);
@@ -117,6 +126,15 @@ TEST_F(CoreTests, GetCapabilitiesFailsWhenNotInitialized) {
     const service::core::Core core(config);
 
     const auto result = core.getCapabilities(1);
+    ASSERT_TRUE(result.isError());
+    EXPECT_THAT(result.error(), ::testing::HasSubstr("not initialized"));
+}
+
+TEST_F(CoreTests, SetZoomAndGetFailsWhenNotInitialized) {
+    const auto config = createValidConfig();
+    const service::core::Core core(config);
+
+    const auto result = core.setZoomAndGet(1, 10);
     ASSERT_TRUE(result.isError());
     EXPECT_THAT(result.error(), ::testing::HasSubstr("not initialized"));
 }

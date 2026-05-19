@@ -211,6 +211,23 @@ namespace service::api {
         return operation;
     }
 
+    Result<std::string> RequestHandler::getStreamUrl(uint32_t camera_id) const {
+        if (!isRunning()) {
+            return Result<std::string>::error("RequestHandler is not running");
+        }
+
+        LOG_INFO("Request: {} camera_id={}", __func__, camera_id);
+        auto operation = core_->getStreamUrl(camera_id);
+
+        if (operation.isError()) {
+            LOG_ERROR("Response: {}", operation.error());
+        } else {
+            LOG_INFO("Response: {}", operation.value());
+        }
+
+        return operation;
+    }
+
     Result<void> RequestHandler::stabilize(uint32_t camera_id, const bool on) const {
         if (!isRunning()) {
             return Result<void>::error("Request Handler is not running");
@@ -242,6 +259,100 @@ namespace service::api {
             LOG_INFO("Response: {}", operation.value());
         }
 
+        return operation;
+    }
+
+    Result<common::types::zoom> RequestHandler::setZoomAndGet(
+        uint32_t camera_id,
+        const common::types::zoom zoom_level) const {
+        if (!isRunning()) {
+            return Result<common::types::zoom>::error("RequestHandler is not running");
+        }
+
+        LOG_INFO("Request: {} camera_id={} zoom={}", __func__, camera_id, zoom_level);
+        auto operation = core_->setZoomAndGet(camera_id, zoom_level);
+        if (operation.isError()) {
+            LOG_ERROR("Response: {}", operation.error());
+        } else {
+            LOG_INFO("Response: {}", operation.value());
+        }
+        return operation;
+    }
+
+    Result<common::types::zoom> RequestHandler::goToMinZoomAndGet(uint32_t camera_id) const {
+        if (!isRunning()) {
+            return Result<common::types::zoom>::error("RequestHandler is not running");
+        }
+
+        LOG_INFO("Request: {} camera_id={}", __func__, camera_id);
+        auto operation = core_->goToMinZoomAndGet(camera_id);
+        if (operation.isError()) {
+            LOG_ERROR("Response: {}", operation.error());
+        } else {
+            LOG_INFO("Response: {}", operation.value());
+        }
+        return operation;
+    }
+
+    Result<common::types::zoom> RequestHandler::goToMaxZoomAndGet(uint32_t camera_id) const {
+        if (!isRunning()) {
+            return Result<common::types::zoom>::error("RequestHandler is not running");
+        }
+
+        LOG_INFO("Request: {} camera_id={}", __func__, camera_id);
+        auto operation = core_->goToMaxZoomAndGet(camera_id);
+        if (operation.isError()) {
+            LOG_ERROR("Response: {}", operation.error());
+        } else {
+            LOG_INFO("Response: {}", operation.value());
+        }
+        return operation;
+    }
+
+    Result<common::types::focus> RequestHandler::setFocusAndGet(
+        uint32_t camera_id,
+        const common::types::focus focus_value) const {
+        if (!isRunning()) {
+            return Result<common::types::focus>::error("RequestHandler is not running");
+        }
+
+        LOG_INFO("Request: {} camera_id={} focus={}", __func__, camera_id, focus_value);
+        auto operation = core_->setFocusAndGet(camera_id, focus_value);
+        if (operation.isError()) {
+            LOG_ERROR("Response: {}", operation.error());
+        } else {
+            LOG_INFO("Response: {}", operation.value());
+        }
+        return operation;
+    }
+
+    Result<bool> RequestHandler::enableAutoFocusAndGet(uint32_t camera_id, bool on) const {
+        if (!isRunning()) {
+            return Result<bool>::error("RequestHandler is not running");
+        }
+
+        LOG_INFO("Request: {} camera_id={} enable={}", __func__, camera_id, on);
+        auto operation = core_->enableAutoFocusAndGet(camera_id, on);
+        if (operation.isError()) {
+            LOG_ERROR("Response: {}", operation.error());
+        } else {
+            LOG_INFO("Response: {}", operation.value());
+        }
+        return operation;
+    }
+
+    Result<bool> RequestHandler::stabilizeAndGet(uint32_t camera_id, bool on) const {
+        if (!isRunning()) {
+            return Result<bool>::error("RequestHandler is not running");
+        }
+
+        LOG_INFO("Request: {} camera_id={} enable={}", __func__, camera_id, on);
+        auto operation = core_->stabilizeAndGet(camera_id, on);
+        if (operation.isError()) {
+            LOG_ERROR("Response: {}", operation.error());
+        } else {
+            LOG_INFO("Response: {}", operation.value());
+        }
         return operation;
     }
 
@@ -285,6 +396,29 @@ namespace service::api {
             LOG_INFO("Response: Success");
         }
 
+        return operation;
+    }
+
+    Result<bool> RequestHandler::SetVideoCapabilityStateAndGet(
+        uint32_t camera_id,
+        const std::string& capability,
+        const bool enable) const {
+        if (!isRunning()) {
+            return Result<bool>::error("RequestHandler is not running");
+        }
+
+        LOG_INFO(
+            "Request: {} camera_id={} capability={} enable={}",
+            __func__,
+            camera_id,
+            capability,
+            enable);
+        auto operation = core_->SetVideoCapabilityStateAndGet(camera_id, capability, enable);
+        if (operation.isError()) {
+            LOG_ERROR("Response: {}", operation.error());
+        } else {
+            LOG_INFO("Response: {}", operation.value());
+        }
         return operation;
     }
 

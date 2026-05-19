@@ -167,6 +167,51 @@ TEST_F(RequestHandlerTests, GetInfoFailsIfNotRunning) {
     ASSERT_TRUE(result.isError());
 }
 
+TEST_F(RequestHandlerTests, GetStreamUrlSuccess) {
+    EXPECT_CALL(*core, start())
+        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*core, getStreamUrl(0))
+        .WillOnce(Return(Result<std::string>::success("http://video.local/camera0")));
+    EXPECT_CALL(*core, stop())
+        .WillOnce(Return(Result<void>::success()));
+
+    ASSERT_TRUE(request_handler->start().isSuccess());
+    const auto result = request_handler->getStreamUrl(0);
+    ASSERT_TRUE(result.isSuccess());
+    EXPECT_EQ(result.value(), "http://video.local/camera0");
+    ASSERT_TRUE(request_handler->stop().isSuccess());
+}
+
+TEST_F(RequestHandlerTests, SetZoomAndGetSuccess) {
+    EXPECT_CALL(*core, start())
+        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*core, setZoomAndGet(0, 55))
+        .WillOnce(Return(Result<common::types::zoom>::success(55u)));
+    EXPECT_CALL(*core, stop())
+        .WillOnce(Return(Result<void>::success()));
+
+    ASSERT_TRUE(request_handler->start().isSuccess());
+    const auto result = request_handler->setZoomAndGet(0, 55);
+    ASSERT_TRUE(result.isSuccess());
+    EXPECT_EQ(result.value(), 55u);
+    ASSERT_TRUE(request_handler->stop().isSuccess());
+}
+
+TEST_F(RequestHandlerTests, SetVideoCapabilityStateAndGetSuccess) {
+    EXPECT_CALL(*core, start())
+        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*core, SetVideoCapabilityStateAndGet(0, "overlay", true))
+        .WillOnce(Return(Result<bool>::success(true)));
+    EXPECT_CALL(*core, stop())
+        .WillOnce(Return(Result<void>::success()));
+
+    ASSERT_TRUE(request_handler->start().isSuccess());
+    const auto result = request_handler->SetVideoCapabilityStateAndGet(0, "overlay", true);
+    ASSERT_TRUE(result.isSuccess());
+    EXPECT_TRUE(result.value());
+    ASSERT_TRUE(request_handler->stop().isSuccess());
+}
+
 TEST_F(RequestHandlerTests, EnableAutoFocusSuccess) {
     EXPECT_CALL(*core, start())
         .WillOnce(Return(Result<void>::success()));
@@ -391,4 +436,3 @@ TEST_F(RequestHandlerTests, GetVideoCapabilityStateFailsIfNotRunning) {
     const auto result = request_handler->getVideoCapabilityState(0, "overlay");
     ASSERT_TRUE(result.isError());
 }
-

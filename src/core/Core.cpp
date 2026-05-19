@@ -1,10 +1,36 @@
 #include "Core.h"
 
+#include <algorithm>
+
 #include "common/logger/Logger.h"
 #include "infrastructure/clients/GrpcClientManager.h"
 #include "infrastructure/clients/ICameraServiceClient.h"
 
 namespace service::core {
+    namespace {
+        Result<common::ServiceInstance> getServiceInstanceById(
+            const common::InfrastructureConfig& infrastructure_config,
+            const std::string& service_name,
+            uint32_t camera_id) {
+            const auto service_it = infrastructure_config.clients.find(service_name);
+            if (service_it == infrastructure_config.clients.end()) {
+                return Result<common::ServiceInstance>::error(service_name + " is not configured");
+            }
+
+            const auto& instances = service_it->second.instances;
+            const auto instance_it = std::find_if(
+                instances.begin(),
+                instances.end(),
+                [camera_id](const common::ServiceInstance& instance) { return instance.id == camera_id; });
+            if (instance_it == instances.end()) {
+                return Result<common::ServiceInstance>::error(
+                    service_name + " instance for camera " + std::to_string(camera_id) + " is not configured");
+            }
+
+            return Result<common::ServiceInstance>::success(*instance_it);
+        }
+    } // unnamed namespace
+
     Core::Core(const common::InfrastructureConfig& infrastructure_config)
         : infrastructure_config_(infrastructure_config), is_running_(false) {
     }
@@ -193,6 +219,22 @@ namespace service::core {
         }
     }
 
+    Result<std::string> Core::getStreamUrl(uint32_t camera_id) const {
+        if (!isRunning()) {
+            return Result<std::string>::error("Core is not initialized");
+        }
+
+        const auto media_instance = getServiceInstanceById(infrastructure_config_, "video_service", camera_id);
+        if (media_instance.isError()) {
+            return Result<std::string>::error(media_instance.error());
+        }
+
+        const auto& instance = media_instance.value();
+        const auto url = "http://" + instance.server + ":" + std::to_string(instance.port) +
+                         "/camera" + std::to_string(camera_id);
+        return Result<std::string>::success(url);
+    }
+
     Result<void> Core::stabilize(uint32_t camera_id, const bool on) const {
         if (!isRunning()) {
             return Result<void>::error("Core is not initialized");
@@ -227,6 +269,50 @@ namespace service::core {
         } catch (const std::exception& e) {
             return Result<bool>::error(std::string("getStabilization failed: ") + e.what());
         }
+    }
+
+    Result<common::types::zoom> Core::setZoomAndGet(uint32_t camera_id, common::types::zoom zoom_level) const {
+        if (const auto result = setZoom(camera_id, zoom_level); result.isError()) {
+            return Result<common::types::zoom>::error(result.error());
+        }
+        return getZoom(camera_id);
+    }
+
+    Result<common::types::zoom> Core::goToMinZoomAndGet(uint32_t camera_id) const {
+        if (const auto result = goToMinZoom(camera_id); result.isError()) {
+            return Result<common::types::zoom>::error(result.error());
+        }
+        return Result<common::types::zoom>::success(common::types::MIN_NORMALIZED_ZOOM);
+    }
+
+    Result<common::types::zoom> Core::goToMaxZoomAndGet(uint32_t camera_id) const {
+        if (const auto result = goToMaxZoom(camera_id); result.isError()) {
+            return Result<common::types::zoom>::error(result.error());
+        }
+        return Result<common::types::zoom>::success(common::types::MAX_NORMALIZED_ZOOM);
+    }
+
+    Result<common::types::focus> Core::setFocusAndGet(
+        uint32_t camera_id,
+        common::types::focus focus_value) const {
+        if (const auto result = setFocus(camera_id, focus_value); result.isError()) {
+            return Result<common::types::focus>::error(result.error());
+        }
+        return getFocus(camera_id);
+    }
+
+    Result<bool> Core::enableAutoFocusAndGet(uint32_t camera_id, const bool on) const {
+        if (const auto result = enableAutoFocus(camera_id, on); result.isError()) {
+            return Result<bool>::error(result.error());
+        }
+        return getAutoFocus(camera_id);
+    }
+
+    Result<bool> Core::stabilizeAndGet(uint32_t camera_id, const bool on) const {
+        if (const auto result = stabilize(camera_id, on); result.isError()) {
+            return Result<bool>::error(result.error());
+        }
+        return getStabilization(camera_id);
     }
 
     Result<common::capabilities::CapabilityList> Core::getCapabilities(uint32_t camera_id) const {
@@ -268,6 +354,16 @@ namespace service::core {
         } catch (const std::exception& e) {
             return Result<void>::error(std::string("SetVideoCapabilityState failed: ") + e.what());
         }
+    }
+
+    Result<bool> Core::SetVideoCapabilityStateAndGet(
+        uint32_t camera_id,
+        const std::string& capability,
+        const bool enable) const {
+        if (const auto result = SetVideoCapabilityState(camera_id, capability, enable); result.isError()) {
+            return Result<bool>::error(result.error());
+        }
+        return getVideoCapabilityState(camera_id, capability);
     }
 
     Result<std::vector<std::string>> Core::getVideoCapabilities(uint32_t camera_id) const {
