@@ -4,7 +4,9 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
+#include <algorithm>
 #include <cstdint>
+#include <cctype>
 #include <regex>
 #include <stdexcept>
 
@@ -73,6 +75,32 @@ namespace service::api {
                 throw std::invalid_argument("Missing or invalid boolean field: " + key);
             }
             return obj[key].get<bool>();
+        }
+
+        unsigned int mapDomainErrorToHttpStatus(const std::string& error_message) {
+            std::string normalized = error_message;
+            std::transform(
+                normalized.begin(),
+                normalized.end(),
+                normalized.begin(),
+                [](const unsigned char c) { return static_cast<char>(std::tolower(c)); });
+
+            if (normalized.find("invalid") != std::string::npos ||
+                normalized.find("missing") != std::string::npos ||
+                normalized.find("unknown") != std::string::npos) {
+                return MHD_HTTP_BAD_REQUEST;
+            }
+            if (normalized.find("not found") != std::string::npos) {
+                return MHD_HTTP_NOT_FOUND;
+            }
+            if (normalized.find("not running") != std::string::npos ||
+                normalized.find("not initialized") != std::string::npos ||
+                normalized.find("not available") != std::string::npos ||
+                normalized.find("not configured") != std::string::npos) {
+                return MHD_HTTP_SERVICE_UNAVAILABLE;
+            }
+
+            return MHD_HTTP_INTERNAL_SERVER_ERROR;
         }
     } // unnamed namespace
 
@@ -252,20 +280,26 @@ namespace service::api {
 
         try {
             if (method == "GET" && path == health_path) {
-                return send_json(MHD_HTTP_OK, json{{"status", "ok"}});
+                return send_json(MHD_HTTP_OK, json{{"status", "ok"}, {"ready", request_handler_.isRunning()}});
             }
 
             if (method == "GET" && std::regex_match(path, STREAM_URL_ROUTE_REGEX)) {
                 const auto camera_id = parseCameraId(path, STREAM_URL_ROUTE_REGEX);
-                const auto stream_url = "http://" + host_ + ":8889/camera" + std::to_string(camera_id);
-                return send_json(MHD_HTTP_OK, json{{"url", stream_url}});
+                const auto result = request_handler_.getStreamUrl(camera_id);
+                if (result.isError()) {
+                    return send_error(
+                        mapDomainErrorToHttpStatus(result.error()),
+                        "Request failed",
+                        result.error());
+                }
+                return send_json(MHD_HTTP_OK, json{{"url", result.value()}});
             }
 
             if (method == "GET" && std::regex_match(path, CAMERA_INFO_ROUTE_REGEX)) {
                 const auto camera_id = parseCameraId(path, CAMERA_INFO_ROUTE_REGEX);
                 const auto result = request_handler_.getInfo(camera_id);
                 if (result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
                 return send_json(MHD_HTTP_OK, json{{"info", result.value()}});
             }
@@ -274,7 +308,7 @@ namespace service::api {
                 const auto camera_id = parseCameraId(path, CAMERA_CAPABILITIES_ROUTE_REGEX);
                 const auto result = request_handler_.getCapabilities(camera_id);
                 if (result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
                 json capabilities_array = json::array();
                 for (const auto& capability : result.value()) {
@@ -287,7 +321,7 @@ namespace service::api {
                 const auto camera_id = parseCameraId(path, CAMERA_ZOOM_ROUTE_REGEX);
                 const auto result = request_handler_.getZoom(camera_id);
                 if (result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
                 return send_json(MHD_HTTP_OK, json{{"zoom", result.value()}});
             }
@@ -296,33 +330,36 @@ namespace service::api {
                 const auto camera_id = parseCameraId(path, CAMERA_ZOOM_ROUTE_REGEX);
                 const auto json_body = json::parse(body);
                 const auto zoom_value = parseJsonUint(json_body, "zoom");
-                if (const auto result = request_handler_.setZoom(camera_id, zoom_value); result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                const auto result = request_handler_.setZoomAndGet(camera_id, zoom_value);
+                if (result.isError()) {
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
-                return send_json(MHD_HTTP_OK, json{{"zoom", zoom_value}});
+                return send_json(MHD_HTTP_OK, json{{"zoom", result.value()}});
             }
 
             if (method == "PUT" && std::regex_match(path, CAMERA_ZOOM_MIN_ROUTE_REGEX)) {
                 const auto camera_id = parseCameraId(path, CAMERA_ZOOM_MIN_ROUTE_REGEX);
-                if (const auto result = request_handler_.goToMinZoom(camera_id); result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                const auto result = request_handler_.goToMinZoomAndGet(camera_id);
+                if (result.isError()) {
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
-                return send_json(MHD_HTTP_OK, json{{"message", "Zoom moved to minimum"}});
+                return send_json(MHD_HTTP_OK, json{{"zoom", result.value()}});
             }
 
             if (method == "PUT" && std::regex_match(path, CAMERA_ZOOM_MAX_ROUTE_REGEX)) {
                 const auto camera_id = parseCameraId(path, CAMERA_ZOOM_MAX_ROUTE_REGEX);
-                if (const auto result = request_handler_.goToMaxZoom(camera_id); result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                const auto result = request_handler_.goToMaxZoomAndGet(camera_id);
+                if (result.isError()) {
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
-                return send_json(MHD_HTTP_OK, json{{"message", "Zoom moved to maximum"}});
+                return send_json(MHD_HTTP_OK, json{{"zoom", result.value()}});
             }
 
             if (method == "GET" && std::regex_match(path, CAMERA_FOCUS_ROUTE_REGEX)) {
                 const auto camera_id = parseCameraId(path, CAMERA_FOCUS_ROUTE_REGEX);
                 const auto result = request_handler_.getFocus(camera_id);
                 if (result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
                 return send_json(MHD_HTTP_OK, json{{"focus", result.value()}});
             }
@@ -331,17 +368,18 @@ namespace service::api {
                 const auto camera_id = parseCameraId(path, CAMERA_FOCUS_ROUTE_REGEX);
                 const auto json_body = json::parse(body);
                 const auto focus_value = parseJsonUint(json_body, "focus");
-                if (const auto result = request_handler_.setFocus(camera_id, focus_value); result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                const auto result = request_handler_.setFocusAndGet(camera_id, focus_value);
+                if (result.isError()) {
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
-                return send_json(MHD_HTTP_OK, json{{"focus", focus_value}});
+                return send_json(MHD_HTTP_OK, json{{"focus", result.value()}});
             }
 
             if (method == "GET" && std::regex_match(path, CAMERA_AUTOFOCUS_ROUTE_REGEX)) {
                 const auto camera_id = parseCameraId(path, CAMERA_AUTOFOCUS_ROUTE_REGEX);
                 const auto result = request_handler_.getAutoFocus(camera_id);
                 if (result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
                 return send_json(MHD_HTTP_OK, json{{"enable", result.value()}});
             }
@@ -350,17 +388,18 @@ namespace service::api {
                 const auto camera_id = parseCameraId(path, CAMERA_AUTOFOCUS_ROUTE_REGEX);
                 const auto json_body = json::parse(body);
                 const auto enable = parseJsonBool(json_body, "enable");
-                if (const auto result = request_handler_.enableAutoFocus(camera_id, enable); result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                const auto result = request_handler_.enableAutoFocusAndGet(camera_id, enable);
+                if (result.isError()) {
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
-                return send_json(MHD_HTTP_OK, json{{"enable", enable}});
+                return send_json(MHD_HTTP_OK, json{{"enable", result.value()}});
             }
 
             if (method == "GET" && std::regex_match(path, CAMERA_STABILIZATION_ROUTE_REGEX)) {
                 const auto camera_id = parseCameraId(path, CAMERA_STABILIZATION_ROUTE_REGEX);
                 const auto result = request_handler_.getStabilization(camera_id);
                 if (result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
                 return send_json(MHD_HTTP_OK, json{{"enable", result.value()}});
             }
@@ -369,17 +408,18 @@ namespace service::api {
                 const auto camera_id = parseCameraId(path, CAMERA_STABILIZATION_ROUTE_REGEX);
                 const auto json_body = json::parse(body);
                 const auto enable = parseJsonBool(json_body, "enable");
-                if (const auto result = request_handler_.stabilize(camera_id, enable); result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                const auto result = request_handler_.stabilizeAndGet(camera_id, enable);
+                if (result.isError()) {
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
-                return send_json(MHD_HTTP_OK, json{{"enable", enable}});
+                return send_json(MHD_HTTP_OK, json{{"enable", result.value()}});
             }
 
             if (method == "GET" && std::regex_match(path, VIDEO_CAPABILITIES_ROUTE_REGEX)) {
                 const auto camera_id = parseCameraId(path, VIDEO_CAPABILITIES_ROUTE_REGEX);
                 const auto result = request_handler_.getVideoCapabilities(camera_id);
                 if (result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
                 json capabilities_array = json::array();
                 for (const auto& cap : result.value()) {
@@ -392,7 +432,7 @@ namespace service::api {
                 const auto [camera_id, capability] = parseCameraIdAndCapability(path);
                 const auto result = request_handler_.getVideoCapabilityState(camera_id, capability);
                 if (result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
                 return send_json(MHD_HTTP_OK, json{{"enable", result.value()}});
             }
@@ -401,11 +441,11 @@ namespace service::api {
                 const auto [camera_id, capability] = parseCameraIdAndCapability(path);
                 const auto json_body = json::parse(body);
                 const auto enable = parseJsonBool(json_body, "enable");
-                if (const auto result = request_handler_.SetVideoCapabilityState(camera_id, capability, enable);
-                    result.isError()) {
-                    return send_error(MHD_HTTP_INTERNAL_SERVER_ERROR, "Internal server error", result.error());
+                const auto result = request_handler_.SetVideoCapabilityStateAndGet(camera_id, capability, enable);
+                if (result.isError()) {
+                    return send_error(mapDomainErrorToHttpStatus(result.error()), "Request failed", result.error());
                 }
-                return send_json(MHD_HTTP_OK, json{{"enable", enable}});
+                return send_json(MHD_HTTP_OK, json{{"enable", result.value()}});
             }
 
             return send_error(MHD_HTTP_NOT_FOUND, "Not found", "Route not found");

@@ -26,14 +26,25 @@ namespace service::api {
         virtual Result<bool> getAutoFocus(uint32_t camera_id) const = 0;
 
         virtual Result<common::types::info> getInfo(uint32_t camera_id) const = 0;
+        virtual Result<std::string> getStreamUrl(uint32_t camera_id) const = 0;
 
         virtual Result<void> stabilize(uint32_t camera_id, bool on) const = 0;
         virtual Result<bool> getStabilization(uint32_t camera_id) const = 0;
+        virtual Result<common::types::zoom> setZoomAndGet(uint32_t camera_id, common::types::zoom zoom_level) const = 0;
+        virtual Result<common::types::zoom> goToMinZoomAndGet(uint32_t camera_id) const = 0;
+        virtual Result<common::types::zoom> goToMaxZoomAndGet(uint32_t camera_id) const = 0;
+        virtual Result<common::types::focus> setFocusAndGet(uint32_t camera_id, common::types::focus focus_value) const = 0;
+        virtual Result<bool> enableAutoFocusAndGet(uint32_t camera_id, bool on) const = 0;
+        virtual Result<bool> stabilizeAndGet(uint32_t camera_id, bool on) const = 0;
 
         virtual Result<common::capabilities::CapabilityList> getCapabilities(uint32_t camera_id) const = 0;
 
         // Video operations (routed by camera_id)
         virtual Result<void> SetVideoCapabilityState(
+            uint32_t camera_id,
+            const std::string& capability,
+            bool enable) const = 0;
+        virtual Result<bool> SetVideoCapabilityStateAndGet(
             uint32_t camera_id,
             const std::string& capability,
             bool enable) const = 0;

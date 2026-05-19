@@ -226,8 +226,8 @@ TEST_F(RestTransportTests, GetZoomReturns500OnHandlerError) {
 }
 
 TEST_F(RestTransportTests, PutZoomSetsValueAndResponds200) {
-    EXPECT_CALL(*handler_mock_, setZoom(1, 55u))
-        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*handler_mock_, setZoomAndGet(1, 55u))
+        .WillOnce(Return(Result<common::types::zoom>::success(55u)));
 
     startServer();
 
@@ -273,8 +273,8 @@ TEST_F(RestTransportTests, GetAutoFocusReturnsState) {
 }
 
 TEST_F(RestTransportTests, PutAutoFocusEnablesAutofocus) {
-    EXPECT_CALL(*handler_mock_, enableAutoFocus(1, true))
-        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*handler_mock_, enableAutoFocusAndGet(1, true))
+        .WillOnce(Return(Result<bool>::success(true)));
 
     startServer();
 
@@ -297,34 +297,40 @@ TEST_F(RestTransportTests, GetStabilizationReturnsState) {
 }
 
 TEST_F(RestTransportTests, GetStreamUrlBuildsCorrectUrl) {
+    EXPECT_CALL(*handler_mock_, getStreamUrl(3))
+        .WillOnce(Return(Result<std::string>::success("http://stream-service/camera3")));
+
     startServer();
 
     const auto resp = sendHttpRequest("GET", "/api/v1/cameras/3/stream/url");
 
     EXPECT_EQ(200, resp.status_code);
     const auto body = json::parse(resp.body);
-    EXPECT_THAT(body.at("url").get<std::string>(), HasSubstr("camera3"));
+    EXPECT_EQ("http://stream-service/camera3", body.at("url").get<std::string>());
 }
 
 TEST_F(RestTransportTests, PutZoomMinCallsGoToMinZoom) {
-    EXPECT_CALL(*handler_mock_, goToMinZoom(1))
-        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*handler_mock_, goToMinZoomAndGet(1))
+        .WillOnce(Return(Result<common::types::zoom>::success(0u)));
 
     startServer();
 
     const auto resp = sendHttpRequest("PUT", "/api/v1/cameras/1/zoom/min");
 
     EXPECT_EQ(200, resp.status_code);
+    const auto body = json::parse(resp.body);
+    EXPECT_EQ(0u, body.at("zoom").get<uint32_t>());
 }
 
 TEST_F(RestTransportTests, PutZoomMaxCallsGoToMaxZoom) {
-    EXPECT_CALL(*handler_mock_, goToMaxZoom(1))
-        .WillOnce(Return(Result<void>::success()));
+    EXPECT_CALL(*handler_mock_, goToMaxZoomAndGet(1))
+        .WillOnce(Return(Result<common::types::zoom>::success(100u)));
 
     startServer();
 
     const auto resp = sendHttpRequest("PUT", "/api/v1/cameras/1/zoom/max");
 
     EXPECT_EQ(200, resp.status_code);
+    const auto body = json::parse(resp.body);
+    EXPECT_EQ(100u, body.at("zoom").get<uint32_t>());
 }
-
