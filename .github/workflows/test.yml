@@ -8,7 +8,7 @@ on:
 
 env:
   BUILD_TYPE: Release
-  BUILD_DIR: build-native
+  BUILD_DIR: build/native-release
 
 jobs:
   test:
@@ -28,7 +28,7 @@ jobs:
         run: sudo apt-get install -y autoconf autoconf-archive automake libtool # Needed by libmicrohttpd
 
       - name: Build
-        run: ./scripts/build.sh native
+        run: ./scripts/build.sh native release
 
       - name: Test
         run: cd ./${{ env.BUILD_DIR }}/$sub_project && ./$bin
