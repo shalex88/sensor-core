@@ -7,7 +7,7 @@
 ## Build
 
 ```bash
-./scripts/build.sh
+./scripts/build.sh native release
 ```
 
 ## Install
